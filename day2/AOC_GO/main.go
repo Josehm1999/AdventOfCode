@@ -52,7 +52,7 @@ func extractNumbers(s string) (int, int) {
 			}
 		} else {
 
-			if len(runes) >= 3 && i <= len(runes)-3  {
+			if len(runes) >= 3 && i <= len(runes)-3 {
 				matchnum = matchNumbers(string(runes[i : i+3]))
 			}
 			if len(runes) >= 4 && i <= len(runes)-4 && matchnum == -1 {

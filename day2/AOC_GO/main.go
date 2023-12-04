@@ -41,7 +41,7 @@ func extractNumbers(s string) (int, int) {
 	runes := []rune(s)
 	left_number := -1
 	right_number := -1
-	matchnum := 0
+	matchnum := -1
 	for i := 0; i < len(runes); i++ {
 		if unicode.IsDigit(runes[i]) {
 			if left_number == -1 {
@@ -52,7 +52,7 @@ func extractNumbers(s string) (int, int) {
 			}
 		} else {
 
-			if len(runes) >= 3 && i <= len(runes)-3 {
+			if len(runes) >= 3 && i <= len(runes)-3  {
 				matchnum = matchNumbers(string(runes[i : i+3]))
 			}
 			if len(runes) >= 4 && i <= len(runes)-4 && matchnum == -1 {
@@ -70,6 +70,7 @@ func extractNumbers(s string) (int, int) {
 				} else {
 					right_number = matchnum
 				}
+				matchnum = -1
 			}
 		}
 

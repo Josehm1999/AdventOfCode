@@ -1,3 +1,3 @@
-module AOC_GO_DAY3
+module AOC_GO
 
 go 1.21.4

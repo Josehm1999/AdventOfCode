@@ -5,12 +5,18 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"unicode"
 )
 
 func check(e error) {
 	if e != nil {
 		panic(e)
 	}
+}
+
+type NumberAndCoordinates struct {
+	value     string
+	yposition int
 }
 
 func main() {
@@ -20,53 +26,91 @@ func main() {
 	}
 	scanner := bufio.NewScanner(file)
 
-	var maze [][]string
+	var maze [][]rune
 	for scanner.Scan() {
 		line := scanner.Text()
-		var char_arr []string
+		var char_arr []rune
 
 		for _, v := range line {
-			char_arr = append(char_arr, string(v))
+			char_arr = append(char_arr, v)
 		}
 
 		maze = append(maze, char_arr)
 	}
 
+	sum := 0
 	for i := range maze {
 
 		// When its the first line
 		if 0 == i {
 			fmt.Println("First Line")
+			var curr_number []rune
 
-			for j, inner := range maze[i] {
+			for j, _ := range maze[i] {
 				if 0 == j {
 					fmt.Println("First Character")
 				}
 
-				fmt.Println(inner)
+				if unicode.IsDigit(maze[i][j]) {
+					if checkForSymbol(maze[i][j-1]) || checkForSymbol(maze[i][j+1]) || checkForSymbol(maze[i+1][j]) || checkForSymbol(maze[i+1][j-1]) || checkForSymbol(maze[i+1][j+1]) {
 
+						for left := j - 1; left >= 0; left-- {
+							if unicode.IsDigit(maze[i][left]) {
+								curr_number = append(curr_number, maze[i][left])
+							}
+						}
+
+						number_info := NumberAndCoordinates{
+							value:     string(maze[i][j]) + "1",
+							yposition: j}
+						curr_number = append(curr_number, number_info)
+						fmt.Println("Tiene en algun lado un simbolo")
+					}
+				}
+
+				// if !unicode.IsLetter(maze[i][j]) && !unicode.IsDigit(maze[i][j]) && "." != string(maze[i][j]) {
+				// 	fmt.Println(maze[i][j])
+				//
+				// 	// Upwards
+				// 	if unicode.IsDigit(maze[i-1][j]) {
+				// 		fmt.Println(maze[i][j], "Tiene arriba a ", maze[i-1][j])
+				//
+				//
+				// 	}
+				// }
 				if len(maze[i])-1 == j {
 					fmt.Println("Last character")
 				}
 			}
+			fmt.Println(curr_number)
 		}
-		// When its the last line
-		// if i == len(maze)-1 {
-		// 	fmt.Println("This is the Last Line")
-		// }
-		// for j, inner := range maze[i] {
+
+		// 	for j, _ := range maze[i] {
+		// 		if 0 == j {
+		// 			// if unicode.IsDigit(maze[i][j]) {
+		// 			// 	fmt.Println("This is a number")
+		// 			// }
+		// 			fmt.Println("First Character")
+		// 		}
 		//
-		// 	// Any other line
-		// 	if j == 0 {
-		// 		fmt.Println(inner)
+		// 		if len(maze[i])-1 == j {
+		// 			fmt.Println("Last character")
+		// 		}
 		// 	}
-		//
 		// }
 	}
-
 	if err := scanner.Err(); err != nil {
 		log.Fatal(err)
 	}
+}
+
+func checkForSymbol(s rune) bool {
+
+	if !unicode.IsLetter(s) && !unicode.IsDigit(s) && "." != string(s) {
+		return true
+	}
+
+	return false
 }
 
 // func extractIds(s string) int {

@@ -6,7 +6,7 @@ import (
 	"log"
 	"os"
 	"strconv"
-	"strings"
+	"unicode"
 )
 
 func check(e error) {
@@ -15,89 +15,176 @@ func check(e error) {
 	}
 }
 
+type Coordinates struct {
+	x int
+	y int
+}
+
+type NumberAndCoordinates struct {
+	value       int
+	lenght      int
+	coordinates Coordinates
+	found       bool
+}
+
 func main() {
-	file, err := os.Open("../input_day3.txt")
+	file, err := os.Open("../input_day4.txt")
 	if err != nil {
 		log.Fatal(err)
 	}
-
-	num_red_cubes := 12
-	num_green_cubes := 13
-	num_blue_cubes := 14
-	//
-	sum_ids := 0
 	scanner := bufio.NewScanner(file)
+	sum := 0
 
+	var maze []NumberAndCoordinates
+	var stored_lines []string
 	for scanner.Scan() {
 		line := scanner.Text()
-		is_line_correct := true
-		curr_id := extractIds(line)
-		cube_info_by_line := extractsNumOfCubesByColor(line)
+		stored_lines = append(stored_lines, line)
+	}
 
-		fmt.Println("Linea Nueva")
-		for _, value := range cube_info_by_line {
+	for i, value := range stored_lines {
+		arr_number_and_coordinates := parseNumbersAndCoordinates(value, i)
+		maze = append(maze, arr_number_and_coordinates...)
+	}
 
-			switch value.color {
-			case "red":
-				if value.number > num_red_cubes {
-					is_line_correct = false
-				}
-			case "green":
-				if value.number > num_green_cubes {
-					is_line_correct = false
-				}
-			case "blue":
-				if value.number > num_blue_cubes {
-					is_line_correct = false
+	for s_i, s_value := range stored_lines {
+		for index, value := range []rune(s_value) {
+			if checkForSymbol(value) {
+				for _, dx := range []int{0, 1, 2} {
+					for _, dy := range []int{0, 1, 2} {
+
+						cx := index + dx - 1
+						cy := s_i + dy - 1
+
+						for m_i, curr_num := range maze {
+							if curr_num.coordinates.y == cy {
+								for index2 := curr_num.coordinates.x; index2 < curr_num.coordinates.x+curr_num.lenght; index2++ {
+									if index2 == cx && !curr_num.found {
+										curr_num.found = true
+										maze[m_i] = curr_num
+										sum += curr_num.value
+									}
+								}
+							}
+						}
+					}
 				}
 			}
 		}
-		if is_line_correct {
-			fmt.Println("Si")
-			sum_ids += curr_id
-		}
 	}
 
-	fmt.Println(sum_ids)
+	// fmt.Println(maze)
+	fmt.Println(sum)
+	// for i := range maze {
+	//
+	// 	// When its the first line
+	// 	if 0 == i {
+	// 		fmt.Println("First Line")
+	// 		var curr_number []rune
+	//
+	// 		for j, _ := range maze[i] {
+	// 			if 0 == j {
+	// 				fmt.Println("First Character")
+	// 			}
+	//
+	// 			if unicode.IsDigit(maze[i][j]) {
+	// 				if checkForSymbol(maze[i][j-1]) || checkForSymbol(maze[i][j+1]) || checkForSymbol(maze[i+1][j]) || checkForSymbol(maze[i+1][j-1]) || checkForSymbol(maze[i+1][j+1]) {
+	//
+	// 					for left := j - 1; left >= 0; left-- {
+	// 						if unicode.IsDigit(maze[i][left]) {
+	// 							curr_number = append(curr_number, maze[i][left])
+	// 						}
+	// 					}
+	//
+	// 					// number_info := NumberAndCoordinates{
+	// 					// 	value:     string(maze[i][j]) + "1",
+	// 					// 	yposition: j}
+	// 					// curr_number = append(curr_number, number_info)
+	// 					fmt.Println("Tiene en algun lado un simbolo")
+	// 				}
+	// 			}
+	//
+	// 			// if !unicode.IsLetter(maze[i][j]) && !unicode.IsDigit(maze[i][j]) && "." != string(maze[i][j]) {
+	// 			// 	fmt.Println(maze[i][j])
+	// 			//
+	// 			// 	// Upwards
+	// 			// 	if unicode.IsDigit(maze[i-1][j]) {
+	// 			// 		fmt.Println(maze[i][j], "Tiene arriba a ", maze[i-1][j])
+	// 			//
+	// 			//
+	// 			// 	}
+	// 			// }
+	// 			if len(maze[i])-1 == j {
+	// 				fmt.Println("Last character")
+	// 			}
+	// 		}
+	// 		fmt.Println(curr_number)
+	// 	}
+
+	// 	for j, _ := range maze[i] {
+	// 		if 0 == j {
+	// 			// if unicode.IsDigit(maze[i][j]) {
+	// 			// 	fmt.Println("This is a number")
+	// 			// }
+	// 			fmt.Println("First Character")
+	// 		}
+	//
+	// 		if len(maze[i])-1 == j {
+	// 			fmt.Println("Last character")
+	// 		}
+	// 	}
+	// }
+	// }
 	if err := scanner.Err(); err != nil {
 		log.Fatal(err)
 	}
 }
 
-func extractIds(s string) int {
-	position_of_separator := strings.Index(s, ":")
-	current_id, err := strconv.Atoi(s[5:position_of_separator])
-	if err != nil {
-		fmt.Println("Cannot extract Id")
+//	func makeRange(min int, max int) []int {
+//		a := make([]int, max-min+1)
+//		for i := range a {
+//			a[i] = min + 1
+//		}
+//		fmt.Println(a)
+//		return a
+//	}
+func checkForSymbol(s rune) bool {
+
+	if !unicode.IsLetter(s) && !unicode.IsDigit(s) && "." != string(s) {
+		return true
 	}
-	return current_id
+
+	return false
 }
 
-type cube_data struct {
-	index  int
-	color  string
-	number int
-}
+func parseNumbersAndCoordinates(s string, counter int) []NumberAndCoordinates {
+	runes := []rune(s)
+	var arr_number_and_coordinates []NumberAndCoordinates
+	left_side := 0
+	for left_side < len(runes) {
+		right_side := len(runes)
+		for right_side > left_side {
+			sub_line := runes[left_side:right_side]
+			if val, err := strconv.Atoi(string(sub_line)); err == nil {
+				if val < 0 {
+					val = val * -1
+				}
 
-func extractsNumOfCubesByColor(s string) []cube_data {
-	position_of_separator := strings.Index(s, ":")
-	right_side_with_cubes := string(s[position_of_separator+1:])
-	var cubes_by_line []cube_data
-	splitted_by_dotted_comma := strings.Split(right_side_with_cubes, ";")
-	for index, value_dotted_coma := range splitted_by_dotted_comma {
-		for _, value_comma := range strings.Split(value_dotted_coma, ",") {
-
-			trimmed_value := strings.Trim(value_comma, " ")
-			number_value_cube, _ := strconv.Atoi(strings.Split(trimmed_value, " ")[0])
-			cube_info := cube_data{
-				index:  index,
-				color:  strings.Split(trimmed_value, " ")[1],
-				number: number_value_cube,
+				fmt.Println(val)
+				curr_number := NumberAndCoordinates{
+					value:  val,
+					lenght: len(sub_line),
+					coordinates: Coordinates{
+						x: left_side,
+						y: counter,
+					},
+				}
+				left_side += len(sub_line)
+				arr_number_and_coordinates = append(arr_number_and_coordinates, curr_number)
 			}
-
-			cubes_by_line = append(cubes_by_line, cube_info)
+			right_side = right_side - 1
 		}
+		left_side += 1
 	}
-
-	return cubes_by_line
+	return arr_number_and_coordinates
 }

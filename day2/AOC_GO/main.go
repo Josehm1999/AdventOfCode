@@ -6,7 +6,7 @@ import (
 	"log"
 	"os"
 	"strconv"
-	"unicode"
+	"strings"
 )
 
 func check(e error) {
@@ -16,83 +16,88 @@ func check(e error) {
 }
 
 func main() {
-	file, err := os.Open("../input_day2.txt")
+	file, err := os.Open("../input_day3.txt")
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	sum := 0
+	num_red_cubes := 12
+	num_green_cubes := 13
+	num_blue_cubes := 14
+	//
+	sum_ids := 0
 	scanner := bufio.NewScanner(file)
 
 	for scanner.Scan() {
 		line := scanner.Text()
-		left, right := extractNumbers(line)
-		sum += left*10 + right
+		is_line_correct := true
+		curr_id := extractIds(line)
+		cube_info_by_line := extractsNumOfCubesByColor(line)
+
+		fmt.Println("Linea Nueva")
+		for _, value := range cube_info_by_line {
+
+			switch value.color {
+			case "red":
+				if value.number > num_red_cubes {
+					is_line_correct = false
+				}
+			case "green":
+				if value.number > num_green_cubes {
+					is_line_correct = false
+				}
+			case "blue":
+				if value.number > num_blue_cubes {
+					is_line_correct = false
+				}
+			}
+		}
+		if is_line_correct {
+			fmt.Println("Si")
+			sum_ids += curr_id
+		}
 	}
 
-	fmt.Println(sum)
-
+	fmt.Println(sum_ids)
 	if err := scanner.Err(); err != nil {
 		log.Fatal(err)
 	}
 }
 
-func extractNumbers(s string) (int, int) {
-	runes := []rune(s)
-	left_number := -1
-	right_number := -1
-	matchnum := -1
-	for i := 0; i < len(runes); i++ {
-		if unicode.IsDigit(runes[i]) {
-			if left_number == -1 {
-				left_number, _ = strconv.Atoi(string(runes[i]))
-				right_number, _ = strconv.Atoi(string(runes[i]))
-			} else {
-				right_number, _ = strconv.Atoi(string(runes[i]))
-			}
-		} else {
-
-			if len(runes) >= 3 && i <= len(runes)-3 {
-				matchnum = matchNumbers(string(runes[i : i+3]))
-			}
-			if len(runes) >= 4 && i <= len(runes)-4 && matchnum == -1 {
-				matchnum = matchNumbers(string(runes[i : i+4]))
-			}
-
-			if len(runes) >= 5 && i <= len(runes)-5 && matchnum == -1 {
-				matchnum = matchNumbers(string(runes[i : i+5]))
-			}
-
-			if matchnum != -1 {
-				if left_number == -1 {
-					left_number = matchnum
-					right_number = matchnum
-				} else {
-					right_number = matchnum
-				}
-				matchnum = -1
-			}
-		}
-
+func extractIds(s string) int {
+	position_of_separator := strings.Index(s, ":")
+	current_id, err := strconv.Atoi(s[5:position_of_separator])
+	if err != nil {
+		fmt.Println("Cannot extract Id")
 	}
-	fmt.Println(left_number, right_number)
-	return left_number, right_number
+	return current_id
 }
 
-func matchNumbers(s string) int {
-	m := map[string]int{"one": 1, "two": 2, "three": 3, "four": 4, "five": 5, "six": 6, "seven": 7, "eight": 8, "nine": 9}
-	for k, v := range m {
-		if k == s {
-			return v
+type cube_data struct {
+	index  int
+	color  string
+	number int
+}
+
+func extractsNumOfCubesByColor(s string) []cube_data {
+	position_of_separator := strings.Index(s, ":")
+	right_side_with_cubes := string(s[position_of_separator+1:])
+	var cubes_by_line []cube_data
+	splitted_by_dotted_comma := strings.Split(right_side_with_cubes, ";")
+	for index, value_dotted_coma := range splitted_by_dotted_comma {
+		for _, value_comma := range strings.Split(value_dotted_coma, ",") {
+
+			trimmed_value := strings.Trim(value_comma, " ")
+			number_value_cube, _ := strconv.Atoi(strings.Split(trimmed_value, " ")[0])
+			cube_info := cube_data{
+				index:  index,
+				color:  strings.Split(trimmed_value, " ")[1],
+				number: number_value_cube,
+			}
+
+			cubes_by_line = append(cubes_by_line, cube_info)
 		}
 	}
-	return -1
-}
-func extractCharacters(s string) int {
-	runes := []rune(s)
 
-	for i := 0; i < len(runes); i++ {
-		return matchNumbers(string(runes[i:]))
-	}
-	return -1
+	return cubes_by_line
 }

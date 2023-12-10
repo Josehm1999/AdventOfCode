@@ -4,9 +4,10 @@ import (
 	"bufio"
 	"fmt"
 	"log"
+	"math"
 	"os"
 	"strconv"
-	"unicode"
+	"strings"
 )
 
 func check(e error) {
@@ -16,19 +17,35 @@ func check(e error) {
 }
 
 func main() {
-	file, err := os.Open("../input_day1.txt")
+	file, err := os.Open("../input_day4.txt")
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	sum := 0
 	scanner := bufio.NewScanner(file)
-
+	var winning_numbers []int
+	var my_numbers []int
 	for scanner.Scan() {
 		line := scanner.Text()
-		left, right := extractNumbers(line)
+		winning_numbers, my_numbers = extractNumbers(line)
 
-		sum += left*10 + right
+		num_ocurr := 0
+		for i, v := range winning_numbers {
+			for _, my_v := range my_numbers {
+				if v == my_v {
+					num_ocurr++
+				}
+			}
+			if i == 4 {
+				if num_ocurr == 1 {
+					sum += 1
+				} else {
+					sum += int(math.Pow(2, float64(num_ocurr-1)))
+				}
+				fmt.Println(v, sum, num_ocurr)
+			}
+		}
 	}
 
 	fmt.Println(sum)
@@ -38,21 +55,30 @@ func main() {
 	}
 }
 
-func extractNumbers(s string) (int, int) {
-	runes := []rune(s)
-	left_number := -1
-	right_number := -1
+func extractNumbers(s string) ([]int, []int) {
+	// runes := []rune(s)
+	var wn []int
+	var myn []int
 
-	for i := 0; i < len(runes); i++ {
-		if unicode.IsDigit(runes[i]) {
-			if left_number == -1 {
-				left_number, _ = strconv.Atoi(string(runes[i]))
-				right_number, _ = strconv.Atoi(string(runes[i]))
-			} else {
-				right_number, _ = strconv.Atoi(string(runes[i]))
-			}
+	split_at_colon := strings.Split(s, ":")
+	// fmt.Println(split_at_colon[1])
+
+	split_at_vertical_bar := strings.Split(split_at_colon[1], "|")
+	split_at_space_wn := strings.Split(strings.Trim(split_at_vertical_bar[0], " "), " ")
+	split_at_space_myn := strings.Split(strings.Trim(split_at_vertical_bar[1], " "), " ")
+
+	for _, v := range split_at_space_wn {
+		curr_number, err := strconv.Atoi(v)
+		if err == nil {
+			wn = append(wn, curr_number)
 		}
 	}
-	fmt.Println(left_number, right_number)
-	return left_number, right_number
+
+	for _, v := range split_at_space_myn {
+		curr_number, err := strconv.Atoi(v)
+		if err == nil {
+			myn = append(myn, curr_number)
+		}
+	}
+	return wn, myn
 }

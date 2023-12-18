@@ -27,45 +27,52 @@ func main() {
 	}
 	contents := strings.Split(string(file[:]), "\n\n")
 	seeds := strings.Split(strings.Split(contents[0], ": ")[1], " ")
-	fmt.Println(seeds)
-
-	for _, value := range seeds {
-		for i := 1; i < len(contents); i++ {
-			fmt.Println(value)
-			parseMap(contents[i])
+	// fmt.Println(seeds)
+	_, new_content := contents[0], contents[1:]
+	// fmt.Println(new_content[6])
+	for _, curr_seed := range seeds {
+		// curr_seed_int, _ := strconv.Atoi(curr_seed)
+		fmt.Println(curr_seed)
+		for i := 0; i < len(new_content); i++ {
+			// fmt.Println(new_content[i])
+			for _, val := range parseMap(new_content[i]) {
+				fmt.Println(val)
+				// 	// fmt.Println(curr_seed, val)
+				// 	if curr_seed_int >= val.src && curr_seed_int <= val.src+val.length-1 {
+				// 		curr_seed_int = curr_seed_int + val.dest - val.src
+				// 		fmt.Println(curr_seed, curr_seed_int)
+				// 	} else {
+				//
+				// 		fmt.Println(curr_seed, curr_seed_int)
+				// 	}
+			}
 		}
 	}
-	// contents := strings.Split(file, "\n\n")
-	// sum := 0
-	// for scanner.Scan() {
-	// 	line := scanner.Text()
-	//
-	// }
-
 }
 
 func createRange(line string) SeedValues {
 	items := strings.Split(line, " ")
 	dest, _ := strconv.Atoi(items[0])
-	src, _ := strconv.Atoi(items[0])
-	length, _ := strconv.Atoi(items[0])
-
+	src, _ := strconv.Atoi(items[1])
+	length, _ := strconv.Atoi(items[2])
 	seedValue := SeedValues{src, dest, length}
 	return seedValue
 }
 
-func parseMap(data string) {
-	// fmt.Println(data)
-    // var seed_values_arr =
+func parseMap(data string) []SeedValues {
+    fmt.Println(data)
+	var seed_values_arr []SeedValues
 	lines := strings.Split(data, "\n")
 	src_to_dest := strings.Split(strings.Split(lines[0], " ")[0], "-")
+	_, new_line := lines[0], lines[1:]
+	src := src_to_dest[0]
+	dest := src_to_dest[2]
 
-	src := src_to_dest[2]
-	dest := src_to_dest[0]
-	for i := 1; i < len(lines); i++ {
+	for _, val := range new_line {
+		seed_values_arr = append(seed_values_arr, createRange(val))
 	}
-	ranges := createRange(lines[])
-	fmt.Println(lines[0])
+	fmt.Println(src, dest)
+	return seed_values_arr
 }
 
 // func loopArraryOfArrays(wn_arr_of_arr [][]int, my_arr_arr [][]int, sum int) int {

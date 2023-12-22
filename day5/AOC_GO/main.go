@@ -1,7 +1,6 @@
 package main
 
 import (
-	"bufio"
 	"fmt"
 	"log"
 	"os"
@@ -15,115 +14,82 @@ func check(e error) {
 	}
 }
 
-type convertion_ranges struct {
-	destination_range int
-	source_range      int
-	range_length      int
+type SeedValues struct {
+	src    int
+	dest   int
+	length int
+}
+
+type SeedRanges struct {
+	start  int
+	length int
 }
 
 func main() {
-	file, err := os.Open("../input_day5.txt")
+	file, err := os.ReadFile("../input_day5.txt")
 	if err != nil {
 		log.Fatal(err)
 	}
+	contents := strings.Split(string(file[:]), "\n\n")
+	seeds := strings.Split(strings.Split(contents[0], ": ")[1], " ")
+	var seed_ranges_arr []SeedRanges
 
-	// sum := 0
-	// counter := 0
-	scanner := bufio.NewScanner(file)
-	var arr_convertion_rg []convertion_ranges
-	var maze [][]convertion_ranges
-
-	counter := 0
-	var arr_strings []string
-	var arr_seeds []int
-	for scanner.Scan() {
-		line := scanner.Text()
-		if counter == 0 {
-			arr_seeds = extractSeeds(line)
-			counter++
-		}
-
-		// if len(strings.Split(line, ":")) > 1 {
-		// 	map_name = strings.Split(strings.Split(line, ":")[0], " ")[0]
-		// }
-		arr_strings = append(arr_strings, line)
+	for i := 0; i < len(seeds)-1; i = i + 2 {
+		start, _ := strconv.Atoi(seeds[i])
+		length, _ := strconv.Atoi(seeds[i+1])
+		seed_ranges_arr = append(seed_ranges_arr, SeedRanges{start, length})
 	}
+	fmt.Println(seed_ranges_arr)
+	_, new_content := contents[0], contents[1:]
 
-	for i, line := range arr_strings {
-		_, err := strconv.Atoi(strings.Split(line, " ")[0])
-		if err == nil {
-			arr_convertion_rg = append(arr_convertion_rg, extractConvertionRanges(line))
-		}
-
-		if strings.Trim(line, " ") == "" || len(arr_strings)-1 == i {
-			if len(arr_convertion_rg) >= 1 {
-				maze = append(maze, arr_convertion_rg)
-			}
-			arr_convertion_rg = nil
-		}
-	}
-
-	lowest := 0
-	for _, num_seed := range arr_seeds {
-		fmt.Println("Change Number of Seed", num_seed)
-		for _, value := range maze {
-			// fmt.Println("Change Number of Maps", value, num_seed)
-			for _, map_values := range value {
-				dest := map_values.destination_range
-				src := map_values.source_range
-				length := map_values.range_length
-				fmt.Println(num_seed, dest, src, length)
-
-				if (num_seed >= src) && (num_seed <= src+length-1) {
-					num_seed += (dest - src)
+	lowest_seed := 2147483647
+	for _, curr_seed := range seeds {
+		curr_seed_int, _ := strconv.Atoi(curr_seed)
+		// fmt.Println(curr_seed)
+		for i := 0; i < len(new_content); i++ {
+			for _, val := range parseMap(new_content[i]) {
+				// 	// fmt.Println(curr_seed, val)
+				if curr_seed_int >= val.src && curr_seed_int <= val.src+val.length-1 {
+					curr_seed_int = curr_seed_int + val.dest - val.src
+					// fmt.Println(curr_seed_int)
+					break
 				}
-			}
-			if num_seed < lowest {
-				lowest = num_seed
+				//             else {
+				// 	fmt.Println(curr_seed, curr_seed_int)
+				// }
 			}
 		}
 
+		if curr_seed_int < lowest_seed {
+			lowest_seed = curr_seed_int
+		}
 	}
 
-	fmt.Println(lowest)
-	if err := scanner.Err(); err != nil {
-		log.Fatal(err)
-	}
+	fmt.Println(lowest_seed)
 }
 
-func extractConvertionRanges(s string) convertion_ranges {
-	split_at_space := strings.Split(s, " ")
-	start_range := 0
-	destination_range := 0
-	length := 0
-	for i, v := range split_at_space {
-		num, err := strconv.Atoi(v)
-		if err == nil {
-			if i == 0 {
-				destination_range = num
-			}
-
-			if i == 1 {
-				start_range = num
-			}
-
-			if i == 2 {
-				length = num
-			}
-		}
-	}
-
-	return convertion_ranges{source_range: start_range, destination_range: destination_range, range_length: length}
+func createRange(line string) SeedValues {
+	items := strings.Split(line, " ")
+	dest, _ := strconv.Atoi(items[0])
+	src, _ := strconv.Atoi(items[1])
+	length, _ := strconv.Atoi(items[2])
+	seedValue := SeedValues{src, dest, length}
+	return seedValue
 }
-func extractSeeds(s string) []int {
-	split_at_colon := strings.Split(s, ":")
-	numbers := strings.Trim(split_at_colon[1], " ")
-	arr_num := strings.Split(numbers, " ")
-	var seeds []int
-	for _, v := range arr_num {
-		if num, err := strconv.Atoi(string(v)); err == nil {
-			seeds = append(seeds, num)
+
+func parseMap(data string) []SeedValues {
+	var seed_values_arr []SeedValues
+	lines := strings.Split(data, "\n")
+	// src_to_dest := strings.Split(strings.Split(lines[0], " ")[0], "-")
+	_, new_line := lines[0], lines[1:]
+	// src := src_to_dest[0]
+	// dest := src_to_dest[2]
+
+	for _, val := range new_line {
+		if val != "" {
+			seed_values_arr = append(seed_values_arr, createRange(val))
 		}
 	}
-	return seeds
+	// fmt.Println(src, dest)
+	return seed_values_arr
 }

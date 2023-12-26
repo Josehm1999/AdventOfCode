@@ -43,7 +43,21 @@ func main() {
 	_, new_content := contents[0], contents[1:]
 
 	lowest_seed := 2147483647
+	fmt.Println(new_content)
 
+	// initial_range := SeedValues{
+	// 	src:    2147483647,
+	// 	dest:   2147483647,
+	// 	length: 214748364,
+	// }
+	// for _, line := range new_content {
+	// 	for _, seed_range := range seed_ranges_arr {
+ //            for
+	// 		curr_range := findMinimunRange(line, initial_range)
+ //
+	// 	}
+	// 	fmt.Println(line)
+	// }
 	for _, seed_range := range seed_ranges_arr {
 		for curr_seed := seed_range.start; curr_seed < seed_range.start+seed_range.length-1; curr_seed++ {
 			curr_seed_int := curr_seed
@@ -89,4 +103,14 @@ func parseMap(data string) []SeedValues {
 	}
 	// fmt.Println(src, dest)
 	return seed_values_arr
+}
+
+func findMinimunRange(line string, curr_range SeedValues) SeedValues {
+	arr_values := parseMap(line)
+	for _, value := range arr_values {
+		if value.src+value.length < curr_range.src+curr_range.length {
+			curr_range = value
+		}
+	}
+	return curr_range
 }

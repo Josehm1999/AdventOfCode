@@ -1,14 +1,14 @@
 package main
 
 import (
-	"fmt"
 	"log"
 	"os"
+	"strconv"
 	"strings"
 )
 
 func main() {
-	part1()
+	part2()
 }
 
 func part1() {
@@ -30,13 +30,47 @@ func part1() {
 
 	sum := 0
 	// rules := make(map[int]int)
-	// orderedPages := make([]int, )
+
+	// orderedPagesArr := make([]map[string]int, len(pagesToUpdate)-1)
+
 	for i := 0; i < len(pagesToUpdate)-1; i++ {
-		fmt.Println(pagesToUpdate[i])
-		sum++
+		numArr := strings.Split(pagesToUpdate[i], ",")
+		orderedPages := make(map[string]int)
+
+		currentMiddleNum := ""
+		for j, numToUpdate := range numArr {
+			orderedPages[numToUpdate] = j
+			if (len(numArr)-1)/2 == j {
+				currentMiddleNum = numToUpdate
+			}
+		}
+
+		isValid := true
+		for _, v := range rulesArr {
+			rulesLevels := strings.Split(v, "|")
+			lowerLevel := rulesLevels[0]
+			upperLevel := rulesLevels[1]
+
+			// println(lowerLevel, upperLevel)
+			lowerBoundIndex, existsLower := orderedPages[lowerLevel]
+			upperBoundIndex, existsUpper := orderedPages[upperLevel]
+
+			if !existsLower || !existsUpper {
+				continue
+			}
+
+			if lowerBoundIndex > upperBoundIndex {
+				isValid = false
+			}
+
+		}
+
+		if isValid {
+			value, _ := strconv.Atoi(currentMiddleNum)
+			sum += value
+		}
 	}
-	println(rulesArr[20])
-	println(pagesToUpdate[5])
+
 	println(sum)
 }
 
@@ -52,61 +86,91 @@ func part2() {
 
 	// line := 0
 
-	temp := strings.Split(file, "\n")
+	temp := strings.Split(file, "\n\n")
+
+	rulesArr := strings.Split(temp[0], "\n")
+	pagesToUpdate := strings.Split(temp[1], "\n")
 
 	sum := 0
+	// rules := make(map[int]int)
 
-	for i := 0; i < len(temp)-1; i++ {
-		fmt.Println(temp[i])
+	// orderedPagesArr := make([]map[string]int, len(pagesToUpdate)-1)
 
-		isPossibleDown := false
+	for i := 0; i < len(pagesToUpdate)-1; i++ {
+		numArr := strings.Split(pagesToUpdate[i], ",")
+		orderedPages := make(map[string]int)
 
-		if (len(temp)-2)-i >= 2 {
-			isPossibleDown = true
+		// currentMiddleNum := ""
+		for j, numToUpdate := range numArr {
+			orderedPages[numToUpdate] = j
+			// if (len(numArr)-1)/2 == j {
+			// 	currentMiddleNum = numToUpdate
+			// }
 		}
-		letters := strings.Split(temp[i], "")
 
-		j := 0
+		isValid := true
+		for _, v := range rulesArr {
+			rulesLevels := strings.Split(v, "|")
+			lowerLevel := rulesLevels[0]
+			upperLevel := rulesLevels[1]
 
-		for j < len(letters) {
-			if letters[j] != "M" && letters[j] != "S" {
-				j++
+			// println(lowerLevel, upperLevel)
+			lowerBoundIndex, existsLower := orderedPages[lowerLevel]
+			upperBoundIndex, existsUpper := orderedPages[upperLevel]
+
+			if !existsLower || !existsUpper {
 				continue
 			}
-			if isPossibleDown {
-				nextCharArr1 := strings.Split(temp[i+1], "")
-				nextCharArr2 := strings.Split(temp[i+2], "")
 
-				firstAxis := false
-				// check for diagonal down - right
-				if (len(letters)-1)-j >= 2 {
+			if lowerBoundIndex > upperBoundIndex {
+				isValid = false
+			}
 
-					possibleXmasDownDiagRight := letters[j] + nextCharArr1[j+1] + nextCharArr2[j+2]
+		}
 
-					if possibleXmasDownDiagRight == "MAS" || possibleXmasDownDiagRight == "SAM" {
+		// if isValid {
+		// 	value, _ := strconv.Atoi(currentMiddleNum)
+		// 	sum += value
+		// }
 
-						firstAxis = true
-					}
-				}
+		if !isValid {
 
-				if !firstAxis {
-					j++
+			// println("New Line")
+			for _, v := range rulesArr {
+				rulesLevels := strings.Split(v, "|")
+				lowerLevel := rulesLevels[0]
+				upperLevel := rulesLevels[1]
+
+				lowerBoundIndex, existsLower := orderedPages[lowerLevel]
+				upperBoundIndex, existsUpper := orderedPages[upperLevel]
+
+				if !existsLower || !existsUpper {
 					continue
 				}
 
-				// check for diagonal down - left
-				if j+2 >= 2 {
-
-					possibleXmasDownDiagLeft := letters[j+2] + nextCharArr1[j+1] + nextCharArr2[j]
-					if possibleXmasDownDiagLeft == "MAS" || possibleXmasDownDiagLeft == "SAM" {
-
-						sum++
-					}
+				if lowerBoundIndex > upperBoundIndex {
+					orderedPages[lowerLevel] = upperBoundIndex
+					orderedPages[upperLevel] = lowerBoundIndex
+					numArr[upperBoundIndex] = lowerLevel
+					numArr[lowerBoundIndex] = upperLevel
 				}
-			}
-			j++
-		}
 
+				// println(lowerBoundIndex, lowerLevel)
+				// println(upperBoundIndex, upperLevel)
+				//
+				// println("------")
+			}
+
+			test := numArr[(len(numArr)-1)/2]
+
+			// for _, v := range numArr {
+			// 	println(v)
+			// }
+			// println(test)
+			value, _ := strconv.Atoi(test)
+			// println(test)
+			sum += value
+		}
 	}
 
 	println(sum)

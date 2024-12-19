@@ -164,12 +164,13 @@ func walk2(maze [][]string, current Point, horientation *string, counter *int, s
 
 		*horientation = changeHorientation(*horientation)
 		// println("Regresa una posicion")
+		(*seen)[current.y][current.x].check = false
 	}
 
-	// Si no se ha visto aumentar el contador
-	// if (*seen)[current.y][current.x].check && *horientation == (*seen)[current.y][current.x].horientation {
-	// 	return true
-	// }
+	if (*seen)[current.y][current.x].check && *horientation == (*seen)[current.y][current.x].horientation {
+		*counter++
+		return true
+	}
 
 	// println(*horientation, (*seen)[current.y][current.x].horientation)
 	// if (*seen)[current.y][current.x].check && (*seen)[current.y][current.x].horientation != *horientation {
@@ -221,7 +222,7 @@ func walk2(maze [][]string, current Point, horientation *string, counter *int, s
 		return true
 	}
 
-	return true
+	return false
 }
 
 func part2() {
@@ -239,11 +240,9 @@ func part2() {
 
 	// println(file)
 
-	maxNumberOfMovements := (len(temp) - 1) * len(temp[0])
 	var maze [][]string
-	var seen [][]Horientation
 
-	println(maxNumberOfMovements)
+	var seen [][]Horientation
 	for _, v := range temp {
 		stringArr := strings.Split(v, "")
 		maze = append(maze, stringArr)
@@ -255,14 +254,33 @@ func part2() {
 
 	guard_y := current_guard_position / len(temp)
 	guard_x := current_guard_position % (len(temp))
-
+	seen = [len(maze)][len(maze)[0]]Horientation{}
 	// println(maze[guard_y][guard_x])
 	// current_guard_line := len(temp)
 	// println("Empieza en ", guard_x, guard_y)
 	counter := 0
 	horientation := "up"
 
-	walk2(maze, Point{x: guard_x, y: guard_y}, &horientation, &counter, &seen)
+	for i, mazeRow := range maze {
+		for j, mazeCol := range mazeRow {
+			if mazeCol != "#" && mazeCol != "^" {
+				seen := [len(maze)][len(mazeRow)]Horientation{}
+				maze[i][j] = "#"
+				walk2(maze, Point{x: guard_x, y: guard_y}, &horientation, &counter, &seen)
+				maze[i][j] = "."
+				// resetArr(&seen)
+				horientation = "up"
+			}
+		}
+	}
 
 	println(counter)
 }
+
+// func resetArr(test *[][]Horientation) {
+// 	for i, v := range *test {
+// 		for j, _ := range v {
+// 			(*test)[i][j] = Horientation{}
+// 		}
+// 	}
+// }

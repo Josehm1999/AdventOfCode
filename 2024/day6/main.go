@@ -16,6 +16,7 @@ type Point struct {
 }
 
 type Horientation struct {
+	point        Point
 	horientation string
 	check        bool
 }
@@ -130,7 +131,7 @@ func walk(maze [][]string, current Point, horientation *string, counter *int, se
 	return false
 }
 
-func walk2(maze [][]string, current Point, horientation *string, counter *int, seen *[][]Horientation) bool {
+func walk2(maze [][]string, current Point, horientation *string, counter *int, seen *[]Horientation) bool {
 
 	// println("Cuantas veces entra", *counter)
 	dirs := map[string][2]int{
@@ -142,7 +143,7 @@ func walk2(maze [][]string, current Point, horientation *string, counter *int, s
 
 	// Se salio del laberinto
 	if current.x < 0 || current.x >= len(maze[0]) || current.y < 0 || current.y >= len(maze)-1 {
-		return false
+		return true
 	}
 
 	// En una pared
@@ -164,53 +165,16 @@ func walk2(maze [][]string, current Point, horientation *string, counter *int, s
 
 		*horientation = changeHorientation(*horientation)
 		// println("Regresa una posicion")
-		(*seen)[current.y][current.x].check = false
+
+        //To do instead of storing all the posible postions and changing the bool value i need to convert the y,x and dir values into a
+        //string key to use a map and speed up the search
+		// (*seen) = false
 	}
 
 	if (*seen)[current.y][current.x].check && *horientation == (*seen)[current.y][current.x].horientation {
 		*counter++
 		return true
 	}
-
-	// println(*horientation, (*seen)[current.y][current.x].horientation)
-	// if (*seen)[current.y][current.x].check && (*seen)[current.y][current.x].horientation != *horientation {
-	// 	// *counter++
-	// 	// Dependiendo de la horientacion validar a los lados para determinar si ha pasado por ahi
-	//
-	// 	println(current.y, current.x, *horientation)
-	// 	if maze[current.y][current.x] != "^" {
-	//
-	// 		switch *horientation {
-	// 		case "up":
-	// 			tmp_x := current.x + dirs["right"][1]
-	// 			tmp_y := current.y + dirs["right"][0]
-	// 			if (*seen)[tmp_y][tmp_x].check {
-	// 				*counter++
-	// 			}
-	// 		case "right":
-	// 			tmp_x := current.x + dirs["down"][1]
-	// 			tmp_y := current.y + dirs["down"][0]
-	//
-	// 			if (*seen)[tmp_y][tmp_x].check {
-	// 				*counter++
-	// 			}
-	// 		case "down":
-	// 			tmp_x := current.x + dirs["down"][1]
-	// 			tmp_y := current.y + dirs["down"][0]
-	//
-	// 			if (*seen)[tmp_y][tmp_x].check {
-	// 				*counter++
-	// 			}
-	// 		case "left":
-	// 			tmp_x := current.x + dirs["down"][1]
-	// 			tmp_y := current.y + dirs["down"][0]
-	//
-	// 			if (*seen)[tmp_y][tmp_x].check {
-	// 				*counter++
-	// 			}
-	// 		}
-	// 	}
-	// }
 
 	// Actualizar posicion a visto
 	(*seen)[current.y][current.x].check = true
@@ -241,46 +205,51 @@ func part2() {
 	// println(file)
 
 	var maze [][]string
+	// var seen = [][]Horientation{}
 
-	var seen [][]Horientation
+	println(len(temp))
+	// maze := make([][]Horientation, len(temp))
 	for _, v := range temp {
 		stringArr := strings.Split(v, "")
 		maze = append(maze, stringArr)
-		tmp_seen := make([]Horientation, len(stringArr))
-		// tmp_path := make([]Point, len(stringArr))
-		seen = append(seen, tmp_seen)
-		// path = append(path, tmp_path)
+		// tmp_seen := make([]Horientation, len(stringArr))
+		// seen = append(seen, tmp_seen)
 	}
 
 	guard_y := current_guard_position / len(temp)
 	guard_x := current_guard_position % (len(temp))
-	seen = [len(maze)][len(maze)[0]]Horientation{}
-	// println(maze[guard_y][guard_x])
-	// current_guard_line := len(temp)
-	// println("Empieza en ", guard_x, guard_y)
 	counter := 0
 	horientation := "up"
 
+	// println(len(seen)-1, len(seen[0]))
 	for i, mazeRow := range maze {
 		for j, mazeCol := range mazeRow {
-			if mazeCol != "#" && mazeCol != "^" {
-				seen := [len(maze)][len(mazeRow)]Horientation{}
-				maze[i][j] = "#"
-				walk2(maze, Point{x: guard_x, y: guard_y}, &horientation, &counter, &seen)
-				maze[i][j] = "."
-				// resetArr(&seen)
-				horientation = "up"
+			if mazeCol == "#" || mazeCol == "^" {
+				continue
 			}
+			seen := []Horientation{}
+			maze[i][j] = "#"
+			walk2(maze, Point{x: guard_x, y: guard_y}, &horientation, &counter, &seen)
+			maze[i][j] = "."
+			horientation = "up"
+
+			// seen = make([][]Horientation, len(seen))
+			// for i := range seen {
+			// 	seen[i] = make([]Horientation, len(mazeRow))
+			// }
+			// resetArr(&seen)
 		}
 	}
 
 	println(counter)
 }
 
-// func resetArr(test *[][]Horientation) {
-// 	for i, v := range *test {
-// 		for j, _ := range v {
-// 			(*test)[i][j] = Horientation{}
-// 		}
+// func resetArr(test [][]Horientation, templen int, rowlen int) [][]Horientation {
+//
+// 	test = make([][]Horientation, templen)
+// 	for i := range test {
+// 		test[i] = make([]Horientation, rowlen)
 // 	}
+//
+// 	return test
 // }

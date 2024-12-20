@@ -8,7 +8,7 @@ import (
 )
 
 func main() {
-	part2()
+	part1()
 }
 
 type Point struct {

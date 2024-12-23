@@ -1,9 +1,10 @@
 package main
 
 import (
-	"fmt"
+	"bufio"
 	"log"
 	"os"
+	"strconv"
 	"strings"
 )
 
@@ -11,230 +12,81 @@ func main() {
 	part1()
 }
 
-type Point struct {
-	x int
-	y int
-}
-
-type Horientation struct {
-	point        Point
-	horientation string
-	check        bool
-}
-
 func part1() {
 
-	data, err := os.ReadFile("./input.txt")
+	file, err := os.Open("./input.txt")
 
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	file := string(data)
+	defer file.Close()
+	scanner := bufio.NewScanner(file)
 
-	current_guard_position := strings.Index(file, "^")
-	temp := strings.Split(file, "\n")
+	total_sum := 0
+	test_value := ""
+	for scanner.Scan() {
+		line := scanner.Text()
+		elements := strings.Split(line, ": ")
 
-	// println(file)
-	var maze [][]string
-	var seen [][]bool
-	var path [][]Point
+		test_value = elements[0]
+		equation_numbers := strings.Split(elements[1], " ")
+		var equation_numbers_integers []int
+		for _, v := range equation_numbers {
+			value, _ := strconv.Atoi(v)
+			equation_numbers_integers = append(equation_numbers_integers, value)
+			println(value)
+		}
+		sum := 0
+		// mul := 1
+		mixed := 1
+		// for _, v := range equation_numbers_integers {
+		// 	sum += v
+		// 	mul = mul * v
+		// }
+		//
+		int_test_value, _ := strconv.Atoi(test_value)
+		// if sum == int_test_value {
+		// 	total_sum += int_test_value
+		// }
+		//
+		// if mul == int_test_value {
+		// 	total_sum += int_test_value
+		// }
 
-	for _, v := range temp {
-		stringArr := strings.Split(v, "")
-		maze = append(maze, stringArr)
-		tmp_seen := make([]bool, len(stringArr))
-		tmp_path := make([]Point, len(stringArr))
-		seen = append(seen, tmp_seen)
-		path = append(path, tmp_path)
-	}
+		var can_be_mul []int
+		var can_be_sum []int
+		for i, _ := range equation_numbers_integers {
 
-	guard_y := current_guard_position / len(temp)
-	guard_x := current_guard_position % (len(temp))
+			if i == len(equation_numbers_integers) {
+				continue
+			}
 
-	// println("Empieza en ", guard_x, guard_y)
-	counter := 0
-	horientation := "up"
-
-	walk(maze, Point{x: guard_x, y: guard_y}, &horientation, &counter, &seen)
-
-	println(counter)
-}
-
-func changeHorientation(actualHorientation string) string {
-	switch actualHorientation {
-	case "up":
-		return "right"
-	case "right":
-		return "down"
-	case "down":
-		return "left"
-	case "left":
-		return "up"
-	default:
-		return "up"
-	}
-}
-
-func walk(maze [][]string, current Point, horientation *string, counter *int, seen *[][]bool) bool {
-
-	// println("Cuantas veces entra", *counter)
-	dirs := map[string][2]int{
-		"up":    {-1, 0},
-		"down":  {1, 0},
-		"left":  {0, -1},
-		"right": {0, 1},
-	}
-
-	// Off the map we finished
-	// println("Primera vali x", current.x < 0 || current.x >= len(maze[0]), current.x, len(maze[0]))
-	// println("Segunda vali y", current.y >= len(maze)-1, current.y, len(maze))
-	if current.x < 0 || current.x >= len(maze[0]) || current.y < 0 || current.y >= len(maze)-1 {
-		// println("Llego al final en posicion", *counter)
-		return true
-	}
-
-	// println(maze[current.y][current.x])
-	// println(current.y, current.x)
-
-	// On a wall
-	if maze[current.y][current.x] == "#" {
-		switch *horientation {
-		case "up":
-			current.x = current.x + dirs["down"][1]
-			current.y = current.y + dirs["down"][0]
-		case "right":
-			current.x = current.x + dirs["left"][1]
-			current.y = current.y + dirs["left"][0]
-		case "down":
-			current.x = current.x + dirs["up"][1]
-			current.y = current.y + dirs["up"][0]
-		case "left":
-			current.x = current.x + dirs["right"][1]
-			current.y = current.y + dirs["right"][0]
+			if int_test_value%equation_numbers_integers[i] == 0 {
+				can_be_mul = append(can_be_mul, equation_numbers_integers[i])
+				println("Can be mul", equation_numbers_integers[i], sum, mixed)
+			} else {
+				can_be_sum = append(can_be_sum, equation_numbers_integers[i])
+			}
 		}
 
-		// *counter--
-		*horientation = changeHorientation(*horientation)
-	}
-	if !(*seen)[current.y][current.x] {
-		*counter++
-	}
-
-	(*seen)[current.y][current.x] = true
-	if (walk(maze, Point{x: current.x + dirs[*horientation][1],
-		y: current.y + dirs[*horientation][0]}, horientation, counter, seen)) {
-		return true
-	}
-
-	return false
-}
-
-func walk2(maze [][]string, current Point, horientation *string, counter *int, seen *map[string]bool) bool {
-
-	// println("Cuantas veces entra", *counter)
-	dirs := map[string][2]int{
-		"up":    {-1, 0},
-		"down":  {1, 0},
-		"left":  {0, -1},
-		"right": {0, 1},
-	}
-
-	// Se salio del laberinto
-	if current.x < 0 || current.x >= len(maze[0]) || current.y < 0 || current.y >= len(maze)-1 {
-		return false
-	}
-
-	// En una pared
-	if maze[current.y][current.x] == "#" {
-		switch *horientation {
-		case "up":
-			current.x = current.x + dirs["down"][1]
-			current.y = current.y + dirs["down"][0]
-		case "right":
-			current.x = current.x + dirs["left"][1]
-			current.y = current.y + dirs["left"][0]
-		case "down":
-			current.x = current.x + dirs["up"][1]
-			current.y = current.y + dirs["up"][0]
-		case "left":
-			current.x = current.x + dirs["right"][1]
-			current.y = current.y + dirs["right"][0]
+		for _, v := range can_be_mul {
+			// println(v)
+			mixed = mixed * v
 		}
 
-		key := fmt.Sprintf("%d,%d,%s", current.x, current.y, *horientation)
-		(*seen)[key] = false
+		for _, v := range can_be_sum {
+			// println(v)
+			mixed += mixed + v
+		}
 
-		*horientation = changeHorientation(*horientation)
-
-		//To do instead of storing all the posible postions and changing the bool value i need to convert the y,x and dir values into a
-		//string key to use a map and speed up the search
-		// (*seen) = false
-
+		if int_test_value == mixed {
+			total_sum += int_test_value
+		}
 	}
 
-	key := fmt.Sprintf("%d,%d,%s", current.x, current.y, *horientation)
-	if (*seen)[key] == true {
-		*counter++
-		return true
-	}
-
-	// Actualizar posicion a visto
-	(*seen)[key] = true
-	// Como aun no ha salido entrar en bucle
-	if (walk2(maze, Point{x: current.x + dirs[*horientation][1],
-		y: current.y + dirs[*horientation][0]}, horientation, counter, seen)) {
-		return true
-	}
-
-	return false
+	println(total_sum)
 }
 
 func part2() {
-
-	data, err := os.ReadFile("./input.txt")
-
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	file := string(data)
-
-	current_guard_position := strings.Index(file, "^")
-	temp := strings.Split(file, "\n")
-
-	// println(file)
-
-	var maze [][]string
-	// var seen = [][]Horientation{}
-
-	// println(len(temp))
-	// maze := make([][]Horientation, len(temp))
-	for _, v := range temp {
-		stringArr := strings.Split(v, "")
-		maze = append(maze, stringArr)
-		// tmp_seen := make([]Horientation, len(stringArr))
-		// seen = append(seen, tmp_seen)
-	}
-
-	guard_y := current_guard_position / len(temp)
-	guard_x := current_guard_position % (len(temp))
-	counter := 0
-	horientation := "up"
-
-	// println(len(seen)-1, len(seen[0]))
-	for i, mazeRow := range maze {
-		for j, mazeCol := range mazeRow {
-			if mazeCol == "#" || mazeCol == "^" {
-				continue
-			}
-			seen := make(map[string]bool)
-			maze[i][j] = "#"
-			walk2(maze, Point{x: guard_x, y: guard_y}, &horientation, &counter, &seen)
-			maze[i][j] = "."
-			horientation = "up"
-		}
-	}
-
-	println(counter)
 }

@@ -8,8 +8,58 @@ import (
 	"strings"
 )
 
+type BinaryNode struct {
+	value     int
+	operation string
+	leftNode  *BinaryNode
+	rightNode *BinaryNode
+}
+
+type Equation struct {
+	value     int
+	operation string
+}
+
 func main() {
 	part1()
+}
+
+func walk(equation_elements []int, curr int, operation string, result int, path []Equation) bool {
+
+	//pre
+	// En los valores revisados aun no existe un valor
+	if len(path) == 0 {
+		path = append(path, Equation{value: curr, operation: operation})
+	}
+
+	// LLegamos al final y las equaciones no dan el resultado
+	if len(equation_elements) == 0 {
+		local_counter := 0
+		// Validamos si las operaciones dan el resultado
+		for _, v := range path {
+			if v.operation == "+" {
+				local_counter += v.value
+			}
+
+			if v.operation == "*" {
+				if local_counter == 0 {
+					local_counter = 1
+				}
+				local_counter = local_counter * v.value
+			}
+		}
+
+		if local_counter == result {
+			return true
+		}
+
+		return false
+	}
+
+	//recurse
+
+	//post
+	return false
 }
 
 func part1() {
@@ -31,57 +81,13 @@ func part1() {
 
 		test_value = elements[0]
 		equation_numbers := strings.Split(elements[1], " ")
+		// head_node := BinaryNode{}
 		var equation_numbers_integers []int
-		for _, v := range equation_numbers {
+		for i, v := range equation_numbers {
 			value, _ := strconv.Atoi(v)
+			// next_value, _ := strconv.Atoi(equation_numbers[i+1])
 			equation_numbers_integers = append(equation_numbers_integers, value)
-			println(value)
-		}
-		sum := 0
-		// mul := 1
-		mixed := 1
-		// for _, v := range equation_numbers_integers {
-		// 	sum += v
-		// 	mul = mul * v
-		// }
-		//
-		int_test_value, _ := strconv.Atoi(test_value)
-		// if sum == int_test_value {
-		// 	total_sum += int_test_value
-		// }
-		//
-		// if mul == int_test_value {
-		// 	total_sum += int_test_value
-		// }
 
-		var can_be_mul []int
-		var can_be_sum []int
-		for i, _ := range equation_numbers_integers {
-
-			if i == len(equation_numbers_integers) {
-				continue
-			}
-
-			if int_test_value%equation_numbers_integers[i] == 0 {
-				can_be_mul = append(can_be_mul, equation_numbers_integers[i])
-				println("Can be mul", equation_numbers_integers[i], sum, mixed)
-			} else {
-				can_be_sum = append(can_be_sum, equation_numbers_integers[i])
-			}
-		}
-
-		for _, v := range can_be_mul {
-			// println(v)
-			mixed = mixed * v
-		}
-
-		for _, v := range can_be_sum {
-			// println(v)
-			mixed += mixed + v
-		}
-
-		if int_test_value == mixed {
-			total_sum += int_test_value
 		}
 	}
 

@@ -16,115 +16,49 @@ type BinaryNode struct {
 }
 
 type Equation struct {
-	value     int
-	operation string
+	value    int
+	operands []int
 }
 
 func main() {
 	part1()
 }
 
-func walk(equation_elements []int, curr int, operation string, result int, path []Equation) bool {
+func walk(equation_elements []Equation) int {
+	counter := 0
+	for i := 0; i < len(equation_elements); i++ {
+		is_valid := walk_recursive(equation_elements[i].operands, 0, equation_elements[i].operands[0], equation_elements[i].value)
 
-	//pre
-	// En los valores revisados aun no existe un valor
-	if len(path) == 0 {
-		path = append(path, Equation{value: curr, operation: operation})
+		if is_valid {
+			counter += equation_elements[i].value
+			println(counter)
+		}
+
+	}
+	return counter
+}
+
+func walk_recursive(equation_elements []int, curr int, current_result int, result int) bool {
+
+	// println(len(equation_elements), curr, current_result, result, current_result == result)
+	if current_result == result {
+		return true
 	}
 
-	// LLegamos al final y las equaciones no dan el resultado
-	if len(equation_elements) == 0 {
-		local_counter := 0
-		// Validamos si las operaciones dan el resultado
-		for _, v := range path {
-			if v.operation == "+" {
-				local_counter += v.value
-			}
-
-			if v.operation == "*" {
-				if local_counter == 0 {
-					local_counter = 1
-				}
-				local_counter = local_counter * v.value
-			}
-		}
-
-		if local_counter == result {
-			return true
-		}
-
+	if len(equation_elements)-1 <= curr {
 		return false
 	}
 
-	//recurse
+	// println(current_result, result, current_result == result)
+	concat_part1 := strconv.Itoa(current_result)
+	concat_part2 := strconv.Itoa(equation_elements[curr+1])
+	concatenation_val, _ := strconv.Atoi(concat_part1 + concat_part2)
 
-	//post
-	return false
-}
+	sum := walk_recursive(equation_elements, curr+1, current_result+equation_elements[curr+1], result)
+	mul := walk_recursive(equation_elements, curr+1, current_result*equation_elements[curr+1], result)
+	concatenation := walk_recursive(equation_elements, curr+1, concatenation_val, result)
 
-func repeatSlices(slice [][]string, repeate int) [][]string {
-
-	pools := make([][]string, len(slice)*repeate)
-
-	for i := range pools {
-		copy(pools[i*len(slice):], slice)
-	}
-
-	result := [][]string{}
-
-	for _, pool := range pools {
-		newResult := [][]string{}
-
-		if len(result) == 0 {
-			for _, y := range pool {
-				newResult = append(newResult, []string{y})
-				result = newResult
-			}
-		} else {
-			for _, x := range result {
-				for _, y := range pool {
-					newList := make([]string, len(x)+1)
-					copy(newList, x)
-					newList[len(x)] = y
-					newResult = append(newResult, newList)
-				}
-			}
-		}
-		result = newResult
-	}
-
-	for i, v := range result {
-
-		for _, value := range v {
-			println(i, len(v), value)
-		}
-	}
-
-	return result
-}
-
-func test(counter int, operations []string, equation_numbers []string) int {
-
-	// for i, v := range equation_numbers {
-	// 	println(i, v)
-	//
-	// 	value, _ := strconv.Atoi(equation_numbers[i])
-	// 	if operations[i] == "+" {
-	// 		counter += value
-	// 	} else {
-	// 		counter *= value
-	// 	}
-	// }
-	for i := 1; i < len(equation_numbers)+1; i++ {
-		// value, _ := strconv.Atoi(equation_numbers[i-1])
-		// println(value, len(operations), operations[0])
-		// if operations[i-1] == "+" {
-		// 	counter += value
-		// } else {
-		// 	counter *= value
-		// }
-	}
-	return counter
+	return sum || mul || concatenation
 }
 
 func part1() {
@@ -140,41 +74,27 @@ func part1() {
 
 	total_sum := 0
 	test_value := 0
+	var equations []Equation
+
 	for scanner.Scan() {
 		line := scanner.Text()
 		elements := strings.Split(line, ": ")
 
 		test_value, _ = strconv.Atoi(elements[0])
 		equation_numbers := strings.Split(elements[1], " ")
-		// equations := [][]Equation{}
-		operations := [][]string{{"+", "*"}}
 
-		repeated := repeatSlices(operations, len(equation_numbers)-1)
-		// ans := 0
-		println("New line", repeated, test_value)
-		// for _, v := range repeated {
-		// 	if test(ans, v, equation_numbers) == test_value {
-		// 		println("Works")
-		// 		total_sum += test_value
-		// 		break
-		// 	}
-		// }
-		// for _, equation := range equation_numbers {
-		// 	for _, oper := range operations {
-		//
-		//
-		// 	}
-		// }
+		var equation_numbers_integers []int
+		for _, v := range equation_numbers {
+			value, _ := strconv.Atoi(v)
+			equation_numbers_integers = append(equation_numbers_integers, value)
 
-		// for i, v := range equation_numbers {
-		// 	value, _ := strconv.Atoi(v)
-		// 	// next_value, _ := strconv.Atoi(equation_numbers[i+1])
-		// 	equation_numbers_integers = append(equation_numbers_integers, value)
-		//
-		// }
+		}
+		curr_equation := Equation{value: test_value, operands: equation_numbers_integers}
+		equations = append(equations, curr_equation)
 	}
 
-	println(total_sum)
+	total_sum = walk(equations)
+	println(equations[0].operands[0], total_sum)
 }
 
 func part2() {

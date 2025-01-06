@@ -54,11 +54,6 @@ func walk_recursive(equation_elements []int, curr int, current_result int, resul
 	return sum || mul || concatenation
 }
 
-type Seen struct {
-	x int
-	y int
-}
-
 func part1() {
 
 	data, err := os.ReadFile("./input.txt")
@@ -74,27 +69,150 @@ func part1() {
 	temp := strings.Split(file, "\n")
 
 	sum := 0
-	var seen []Seen
+	seen := make(map[string]bool)
 
 	for i := 0; i < len(temp)-1; i++ {
-		fmt.Println(temp[i])
-		isPossibleUp := false
+		// fmt.Println(temp[i])
 		isPossibleDown := false
 
 		if (len(temp)-2)-i > 2 {
 			isPossibleDown = true
 		}
-		if i > 2 {
-			isPossibleUp = true
-		}
 
 		letters := strings.Split(temp[i], "")
-		println(isPossibleUp, isPossibleDown)
+		// println(isPossibleUp, isPossibleDown, sum)
 		for j, v := range letters {
-			println(j, v)
-			seen := append(seen, Seen{x: j, y: i})
+			key := fmt.Sprintf("%d,%d", j, i)
+			seen[key] = true
+
+			if v == "." {
+				continue
+			}
+
+			println("New line", v)
+			if isPossibleDown {
+
+				nextLine := strings.Split(temp[i+1], "")
+				twoLinesBelow := strings.Split(temp[i+2], "")
+				threeLinesBelow := strings.Split(temp[i+3], "")
+				//RIGHT
+				if (len(letters)-1)-j >= 3 {
+					// check for diagonal down - right
+					for k := 1; k <= 3; k++ {
+						if j+k > (len(letters) - 1) {
+							continue
+						}
+
+						if v == nextLine[j+k] {
+							println(i+1, j+k)
+							if j+k+1 <= len(letters)-1 {
+								println("Check Top R", i+2, j+k+1)
+								sum++
+							}
+							sum++
+						}
+						if v == twoLinesBelow[j+k] {
+							println(i+2, j+k)
+							if j+k+1 <= len(letters)-1 {
+								println("Check Top R", i+3, j+k+1)
+								sum++
+							}
+							sum++
+						}
+						if v == threeLinesBelow[j+k] {
+							println(i+3, j+k)
+							if j+k+1 <= len(letters)-1 {
+								println("Check Top R", i+4, j+k+1)
+								sum++
+							}
+							sum++
+						}
+					}
+				}
+
+				//Left
+				if j >= 3 {
+					for k := 1; k <= 3; k++ {
+						if j-k < 0 {
+							continue
+						}
+						if v == nextLine[j-k] {
+							println("1L", i+1, j-k)
+							if j-(2*k) >= 0 && i+1 <= len(temp)-1 {
+								sum++
+							}
+
+							if j+k+1 <= len(letters)-1 && i-1 >= 0 {
+								sum++
+							}
+						}
+						if v == twoLinesBelow[j-k] {
+							println("2l", i+2, j-k)
+							if j-(2*k) >= 0 && i+2 <= len(temp)-1 {
+								// println("Check Bot 2L", i+4, j-(2*k), test[j-(2*k)])
+								sum++
+							}
+
+							if j+k+1 <= len(letters)-1 && i-2 >= 0 {
+								sum++
+							}
+						}
+						if v == threeLinesBelow[j-k] {
+							println("3L", i+2, j-k)
+							if j-(2*k) >= 0 && i+3 <= len(temp)-1 {
+								sum++
+							}
+
+							if j+k+1 <= len(letters)-1 && i-3 >= 0 {
+								sum++
+							}
+						}
+					}
+				}
+			}
+
+			// if isPossibleUp {
+			// 	possibleDiagLine := strings.Split(temp[i-2], "")
+			// 	secondPossibleDiagLine := strings.Split(temp[i-1], "")
+			// 	if j >= 3 {
+			// 		if v == possibleDiagLine[j+1] {
+			// 			if (i-4 < len(temp)-2) && (j+2) < len(letters)-1 {
+			// 				println("Possible new antinode")
+			//                          sum++
+			// 			}
+			// 		}
+			//
+			// 		if v == secondPossibleDiagLine[j+2] {
+			//
+			// 			if (i-3 < len(temp)-2) && (j+3) < len(letters)-1 {
+			// 				println("Possible new antinode 2")
+			//                          sum++
+			// 			}
+			// 		}
+			// 	}
+			//
+			// 	// check for diagonal down - left
+			// 	if (len(letters)-1)-j >= 3 {
+			//
+			// 		if v == possibleDiagLine[j-1] {
+			// 			if (i-4 < len(temp)-2) && (j-2) < len(letters)-1 {
+			// 				println("Possible new antinode")
+			//                          sum++
+			// 			}
+			// 		}
+			//
+			// 		if v == secondPossibleDiagLine[j-2] {
+			//
+			// 			if (i-3 < len(temp)-2) && (j-3) < len(letters)-1 {
+			// 				println("Possible new antinode 2")
+			//                          sum++
+			// 			}
+			// 		}
+			// 	}
+			// }
+			// println(v, seen[key])
 		}
 
 	}
-	println(sum, temp)
+	println(sum)
 }

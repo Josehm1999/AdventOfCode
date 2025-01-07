@@ -35,9 +35,12 @@ func part1() {
 	temp := strings.Split(file, "\n")
 
 	var antenna []Antenna
-	cols_start := strings.Split(temp[0], "")
-	cols_len := len(cols_start)
-	rows_len := len(temp) - 1
+	// cols_start := strings.Split(temp[0], "")
+	cols_len := 49
+	rows_len := 49
+
+	// fmt.Println(cols_len)
+	// fmt.Println(rows_len)
 	for i := range temp {
 		// for i := 0; i < len(temp)-1; i++ {
 
@@ -253,13 +256,14 @@ func absDiffInt(x, y int) int {
 	return x - y
 }
 
-func removeDuplicate[T comparable](sliceList []T) []T {
-	allKeys := make(map[T]bool)
+func removeDuplicate(sliceList []Antenna) []Antenna {
+	allKeys := make(map[string]bool)
 
-	list := []T{}
+	list := []Antenna{}
 	for _, item := range sliceList {
-		if _, value := allKeys[item]; !value {
-			allKeys[item] = true
+		key := fmt.Sprintf("%d,%d", item.col, item.row)
+		if _, value := allKeys[key]; !value {
+			allKeys[key] = true
 			list = append(list, item)
 		}
 	}

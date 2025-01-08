@@ -30,20 +30,15 @@ func part1() {
 
 	file := string(data)
 
-	// line := 0
-
 	temp := strings.Split(file, "\n")
 
 	var antenna []Antenna
-	// cols_start := strings.Split(temp[0], "")
-	cols_len := 49
-	rows_len := 49
+	col_test := strings.Split(temp[0], "")
+	cols_len := len(col_test) - 1
+	rows_len := len(temp) - 2
 
-	// fmt.Println(cols_len)
-	// fmt.Println(rows_len)
+	// println(cols_len, rows_len)
 	for i := range temp {
-		// for i := 0; i < len(temp)-1; i++ {
-
 		cols := strings.Split(temp[i], "")
 		for j, v := range cols {
 
@@ -51,83 +46,6 @@ func part1() {
 				continue
 			}
 			antenna = append(antenna, Antenna{row: i, col: j, freq: v})
-			// nextLine := strings.Split(temp[i+1], "")
-			// twoLinesBelow := strings.Split(temp[i+2], "")
-			// threeLinesBelow := strings.Split(temp[i+3], "")
-			//RIGHT
-			// if (len(letters)-1)-j >= 3 {
-			// 	// check for diagonal down - right
-			// 	for k := 1; k <= 3; k++ {
-			// 		if j+k > (len(letters) - 1) {
-			// 			continue
-			// 		}
-			//
-			// 		if v == nextLine[j+k] {
-			// 			println(i+1, j+k)
-			// 			if j+k+1 <= len(letters)-1 {
-			// 				println("Check Top R", i+2, j+k+1)
-			// 				sum++
-			// 			}
-			// 			sum++
-			// 		}
-			// 		if v == twoLinesBelow[j+k] {
-			// 			println(i+2, j+k)
-			// 			if j+k+1 <= len(letters)-1 {
-			// 				println("Check Top R", i+3, j+k+1)
-			// 				sum++
-			// 			}
-			// 			sum++
-			// 		}
-			// 		if v == threeLinesBelow[j+k] {
-			// 			println(i+3, j+k)
-			// 			if j+k+1 <= len(letters)-1 {
-			// 				println("Check Top R", i+4, j+k+1)
-			// 				sum++
-			// 			}
-			// 			sum++
-			// 		}
-			// 	}
-			// }
-
-			//Left
-			// if j >= 3 {
-			// 	for k := 1; k <= 3; k++ {
-			// 		if j-k < 0 {
-			// 			continue
-			// 		}
-			// 		if v == nextLine[j-k] {
-			// 			println("1L", i+1, j-k)
-			// 			if j-(2*k) >= 0 && i+1 <= len(temp)-1 {
-			// 				sum++
-			// 			}
-			//
-			// 			if j+k+1 <= len(letters)-1 && i-1 >= 0 {
-			// 				sum++
-			// 			}
-			// 		}
-			// 		if v == twoLinesBelow[j-k] {
-			// 			println("2l", i+2, j-k)
-			// 			if j-(2*k) >= 0 && i+2 <= len(temp)-1 {
-			// 				// println("Check Bot 2L", i+4, j-(2*k), test[j-(2*k)])
-			// 				sum++
-			// 			}
-			//
-			// 			if j+k+1 <= len(letters)-1 && i-2 >= 0 {
-			// 				sum++
-			// 			}
-			// 		}
-			// 		if v == threeLinesBelow[j-k] {
-			// 			println("3L", i+2, j-k)
-			// 			if j-(2*k) >= 0 && i+3 <= len(temp)-1 {
-			// 				sum++
-			// 			}
-			//
-			// 			if j+k+1 <= len(letters)-1 && i-3 >= 0 {
-			// 				sum++
-			// 			}
-			// 		}
-			// 	}
-			// }
 		}
 	}
 
@@ -170,82 +88,41 @@ func product(antennas []Antenna, cols_len int, rows_len int) []Antenna {
 
 			col_delta := antennas[i].col - antennas[k].col
 			row_delta := antennas[i].row - antennas[k].row
+			// println(col_delta, row_delta)
+			// findPossibleAntennas(antennas[i], antennas[k], col_delta, row_delta, rows_len, cols_len, &result)
+			//
+			canTraverse := true
+			counter := 0
+			for canTraverse {
+				counter++
 
-			possibleAntenna := Antenna{row: antennas[k].row - row_delta, col: antennas[k].col - col_delta}
-			possibleAntenna2 := Antenna{row: antennas[i].row + row_delta, col: antennas[i].col + col_delta}
+				possibleAntenna := Antenna{row: antennas[k].row - row_delta*counter, col: antennas[k].col - col_delta*counter}
+				possibleAntenna2 := Antenna{row: antennas[i].row + row_delta*counter, col: antennas[i].col + col_delta*counter}
 
-			// result = append(result, possibleAntenna2)
-			// result = append(result, possibleAntenna)
-			if possibleAntenna.row >= 0 && possibleAntenna.col >= 0 && possibleAntenna.row <= rows_len && possibleAntenna.col <= cols_len {
-				result = append(result, possibleAntenna)
+				canTraverse = false
+				if possibleAntenna.row >= 0 && possibleAntenna.col >= 0 && possibleAntenna.row <= rows_len && possibleAntenna.col <= cols_len {
+					canTraverse = true
+					result = append(result, possibleAntenna)
+				}
+				// //
+				if possibleAntenna2.row >= 0 && possibleAntenna2.col >= 0 && possibleAntenna2.row <= rows_len && possibleAntenna2.col <= cols_len {
+					canTraverse = true
+					result = append(result, possibleAntenna2)
+				}
+
+				if canTraverse {
+					result = append(result, antennas[k])
+					result = append(result, antennas[i])
+				}
+
+				// fmt.Println(canTraverse, possibleAntenna, possibleAntenna2)
 			}
 			//
-			if possibleAntenna2.row >= 0 && possibleAntenna2.col >= 0 && possibleAntenna2.row <= rows_len && possibleAntenna2.col <= cols_len {
-				result = append(result, possibleAntenna2)
-			}
-			// if col_delta == 3 && row_delta == 1 {
-			// 	if antennas[i].row-1 >= 0 && antennas[i].col+3 <= cols_len {
-			// 		result = append(result, Antenna{row: antennas[i].row - 1, col: antennas[i].col + 3})
-			// 	}
-			//
-			// 	if antennas[k].row+1 <= rows_len && antennas[k].col-3 >= 0 {
-			// 		result = append(result, Antenna{row: antennas[k].row + 1, col: antennas[k].col - 3})
-			// 	}
-			// }
-			//
-			// if col_delta == 1 && row_delta == 2 {
-			// 	if antennas[i].row-2 >= 0 && antennas[i].col+1 <= cols_len {
-			// 		result = append(result, Antenna{row: antennas[i].row - 2, col: antennas[i].col + 1})
-			// 	}
-			//
-			// 	if antennas[k].row+2 <= rows_len && antennas[k].col-1 >= 0 {
-			// 		result = append(result, Antenna{row: antennas[k].row + 2, col: antennas[k].col - 1})
-			// 	}
-			// }
-			//
-			// if col_delta == 2 && row_delta == 1 {
-			// 	if antennas[i].row-1 >= 0 && antennas[i].col+2 <= cols_len {
-			// 		result = append(result, Antenna{row: antennas[i].row - 1, col: antennas[i].col + 2})
-			// 	}
-			//
-			// 	if antennas[k].row+1 <= rows_len && antennas[k].col-2 >= 0 {
-			// 		result = append(result, Antenna{row: antennas[k].row + 1, col: antennas[k].col - 2})
-			// 	}
-			// }
-			//
-			// if col_delta == 2 && row_delta == 3 {
-			// 	if antennas[i].row-3 >= 0 && antennas[i].col+2 <= cols_len {
-			// 		result = append(result, Antenna{row: antennas[i].row - 3, col: antennas[i].col + 2})
-			// 	}
-			//
-			// 	if antennas[k].row+3 <= rows_len && antennas[k].col-2 >= 0 {
-			// 		result = append(result, Antenna{row: antennas[k].row + 3, col: antennas[k].col - 2})
-			// 	}
-			// }
-			//
-			// if col_delta == 1 && row_delta == 1 {
-			// 	if antennas[i].row-1 >= 0 && antennas[i].col+1 <= cols_len {
-			// 		result = append(result, Antenna{row: antennas[i].row - 1, col: antennas[i].col + 1})
-			// 	}
-			//
-			// 	if antennas[k].row+1 <= rows_len && antennas[k].col-1 >= 0 {
-			// 		result = append(result, Antenna{row: antennas[k].row + 1, col: antennas[k].col - 1})
-			// 	}
-			// }
-			//
-			// if col_delta == 4 && row_delta == 3 {
-			// 	if antennas[i].row-3 >= 0 && antennas[i].col+4 <= cols_len {
-			// 		result = append(result, Antenna{row: antennas[i].row - 3, col: antennas[i].col + 4})
-			// 	}
-			//
-			// 	if antennas[k].row+3 <= rows_len && antennas[k].col-4 >= 0 {
-			// 		result = append(result, Antenna{row: antennas[k].row + 3, col: antennas[k].col - 4})
-			// 	}
-			// }
+			// // result = append(result, possibleAntenna2)
+			// // result = append(result, possibleAntenna)
 		}
 	}
 
-	// fmt.Println(result)
 	return result
 }
 
@@ -269,4 +146,58 @@ func removeDuplicate(sliceList []Antenna) []Antenna {
 	}
 
 	return list
+}
+
+func findPossibleAntennas(firstAntenna Antenna, secondAntenna Antenna, col_delta int, row_delta int, row_limit int, col_limit int, result *[]Antenna) bool {
+
+	// Pre
+
+	if row_delta == 0 && col_delta == 0 {
+		return true
+	}
+	//    fmt.Println(firstAntenna)
+	// fmt.Println(secondAntenna)
+	possibleAntenna := Antenna{row: secondAntenna.row - row_delta, col: secondAntenna.col - col_delta, freq: secondAntenna.freq}
+	possibleAntenna2 := Antenna{row: firstAntenna.row + row_delta, col: firstAntenna.col + col_delta, freq: firstAntenna.freq}
+
+	// fmt.Println(possibleAntenna)
+	// fmt.Println(possibleAntenna2)
+
+	canTraverse := false
+	if possibleAntenna.row >= 0 && possibleAntenna.col >= 0 && possibleAntenna.row <= row_limit && possibleAntenna.col <= col_limit {
+		canTraverse = true
+		*result = append(*result, possibleAntenna)
+	}
+
+	if possibleAntenna2.row >= 0 && possibleAntenna2.col >= 0 && possibleAntenna2.row <= row_limit && possibleAntenna2.col <= col_limit {
+		canTraverse = true
+		*result = append(*result, possibleAntenna2)
+	}
+	// Recurse
+
+	// test_col := 0
+	// test_row := 0
+	// if col_delta == 1 {
+	// 	test_col = col_delta + 1
+	// } else if col_delta == -1 {
+	// 	test_col = col_delta - 1
+	// } else {
+	// 	test_col = col_delta * 2
+	// }
+	//
+	// if row_delta == 1 {
+	// 	test_row = row_delta + 1
+	// } else if test_row == -1 {
+	// 	test_row = row_delta - 1
+	// } else {
+	// 	test_row = row_delta * 2
+	// }
+
+	fmt.Println(possibleAntenna)
+	println(col_delta*+1, row_delta*1, col_delta, row_delta)
+	if canTraverse {
+		findPossibleAntennas(firstAntenna, secondAntenna, col_delta+1, row_delta+1, row_limit, col_limit, result)
+	}
+
+	return false
 }

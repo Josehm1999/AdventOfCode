@@ -5,8 +5,10 @@ import (
 	"fmt"
 	"log"
 	"os"
-	// "strconv"
 	"slices"
+
+	// "strconv"
+
 	"strings"
 )
 
@@ -38,10 +40,11 @@ func part1() {
 	rows_len := len(temp) - 2
 
 	println(cols_len, rows_len)
+
+	//Find all antennas
 	for i := range temp {
 		cols := strings.Split(temp[i], "")
 		for j, v := range cols {
-
 			if v == "." {
 				continue
 			}
@@ -49,76 +52,115 @@ func part1() {
 		}
 	}
 
+	//Find the combinantions of the antennas
+
 	freqCmp := func(a, b Antenna) int {
 		return cmp.Compare(a.freq, b.freq)
 	}
 	slices.SortFunc(antenna, freqCmp)
 
+	//Check the antinodes to be found
+
+	output := make(map[string][]Antenna)
 	var groupedAntennas [][]Antenna
 	current_group := []Antenna{antenna[0]}
+	output[antenna[0].freq] = current_group
 
+	// for _, value := range antenna {
+	// 	val, ok := output[value.freq]
+	// 	if ok {
+	// 		val = append(val, value)
+	// 	} else {
+	// 		groupedAntennas = append(groupedAntennas, output[value.freq])
+	// 	}
+	// }
+	// var groupedAntennas [][]Antenna
+	// current_group := []Antenna{antenna[0]}
+	// counter := 0
+	//
 	for i := 1; i < len(antenna); i++ {
 		if antenna[i].freq == antenna[i-1].freq {
 			current_group = append(current_group, antenna[i])
+			if i == len(antenna)-1 {
+				groupedAntennas = append(groupedAntennas, current_group)
+			}
 		} else {
 			groupedAntennas = append(groupedAntennas, current_group)
 			current_group = []Antenna{antenna[i]}
 		}
 	}
+	// fmt.Println(groupedAntennas)
+	// fmt.Println((antenna))
+	//Remove duplicates
 
-	groupedAntennas = append(groupedAntennas, current_group)
+	//Count antinodes
 
+	//
+	// // fmt.Println(groupedAntennas)
+	// groupedAntennas = append(groupedAntennas, current_group)
+	//
 	var result []Antenna
 	for _, group := range groupedAntennas {
 		// fmt.Println(group, cols_len, rows_len)
 		result = append(result, product(group, cols_len, rows_len)...)
 	}
-
+	//
 	fmt.Println(len(removeDuplicate(result)))
+
+	// new_result := removeDuplicate(result)
+
 }
 
 func product(antennas []Antenna, cols_len int, rows_len int) []Antenna {
 	var result []Antenna
-
-
+	// seen := make(map[Antenna]int)
 	for i := 0; i < len(antennas); i++ {
 		for k := i + 1; k < len(antennas); k++ {
 			if antennas[k].freq != antennas[i].freq {
 				continue
 			}
 
-			col_delta := antennas[i].col - antennas[k].col
-			row_delta := antennas[i].row - antennas[k].row
+			// fmt.Println(antennas[i], antennas[k])
+			// col_delta := antennas[i].col - antennas[k].col
+			// row_delta := antennas[i].row - antennas[k].row
 			// println(col_delta, row_delta)
-			// findPossibleAntennas(antennas[i], antennas[k], col_delta, row_delta, rows_len, cols_len, &result)
+			findPossibleAntennas2(antennas[i], antennas[k], rows_len, cols_len, &result)
+
+			// canTraverse := true
+			// counter := 0
+			// for canTraverse {
+			// counter++
+			// fmt.Println("New Antenna")
+			// fmt.Println(antennas[k], antennas[i], row_delta*counter)
+			// possibleAntenna := Antenna{row: antennas[k].row - row_delta, col: antennas[k].col - col_delta}
+			// possibleAntenna2 := Antenna{row: antennas[i].row + row_delta, col: antennas[i].col + col_delta}
 			//
-			canTraverse := true
-			counter := 0
-			for canTraverse {
-				counter++
-				possibleAntenna := Antenna{row: antennas[k].row - row_delta*counter, col: antennas[k].col - col_delta*counter}
-				possibleAntenna2 := Antenna{row: antennas[i].row + row_delta*counter, col: antennas[i].col + col_delta*counter}
+			// // canTraverse = false
+			// if possibleAntenna.row >= 0 && possibleAntenna.col >= 0 && possibleAntenna.row <= rows_len && possibleAntenna.col <= cols_len {
+			// 	// canTraverse = true
+			// 	result = append(result, possibleAntenna)
+			// }
+			//
+			// if possibleAntenna2.row >= 0 && possibleAntenna2.col >= 0 && possibleAntenna2.row <= rows_len && possibleAntenna2.col <= cols_len {
+			// 	// canTraverse = true
+			// 	result = append(result, possibleAntenna2)
+			// }
 
-				canTraverse = false
-				if possibleAntenna.row >= 0 && possibleAntenna.col >= 0 && possibleAntenna.row <= rows_len && possibleAntenna.col <= cols_len {
-					canTraverse = true
-					result = append(result, possibleAntenna)
-				}
+			// fmt.Println(canTraverse, possibleAntenna, possibleAntenna2)
+			// if canTraverse {
+			// 	if seen[antennas[k]] >= 2 {
+			// 		result = append(result, antennas[k])
+			// 	}
+			//
+			// 	if seen[antennas[i]] >= 2 {
+			// 		result = append(result, antennas[i])
+			// 	}
+			//
+			// 	seen[antennas[k]]++
+			// 	seen[antennas[i]]++
+			// }
 
-				if possibleAntenna2.row >= 0 && possibleAntenna2.col >= 0 && possibleAntenna2.row <= rows_len && possibleAntenna2.col <= cols_len {
-					canTraverse = true
-					result = append(result, possibleAntenna2)
-				}
-
-				// fmt.Println(canTraverse, possibleAntenna, possibleAntenna2)
-				if canTraverse {
-					result = append(result, antennas[k])
-					result = append(result, antennas[i])
-
-					// fmt.Println(antennas[i], antennas[k])
-				}
-
-			}
+			// }
 			//
 			// // result = append(result, possibleAntenna2)
 			// // result = append(result, possibleAntenna)
@@ -156,7 +198,7 @@ func findPossibleAntennas(firstAntenna Antenna, secondAntenna Antenna, col_delta
 	possibleAntenna := Antenna{row: secondAntenna.row - row_delta, col: secondAntenna.col - col_delta, freq: secondAntenna.freq}
 	possibleAntenna2 := Antenna{row: firstAntenna.row + row_delta, col: firstAntenna.col + col_delta, freq: firstAntenna.freq}
 
-	fmt.Println(firstAntenna)
+	fmt.Println(firstAntenna, possibleAntenna)
 	fmt.Println(secondAntenna)
 	fmt.Println(row_delta, col_delta)
 
@@ -174,7 +216,9 @@ func findPossibleAntennas(firstAntenna Antenna, secondAntenna Antenna, col_delta
 	fmt.Println(canTraverse)
 
 	if canTraverse {
-		findPossibleAntennas(firstAntenna, secondAntenna, col_delta, row_delta, row_limit, col_limit, result)
+		*result = append(*result, firstAntenna)
+		*result = append(*result, secondAntenna)
+		findPossibleAntennas(possibleAntenna, possibleAntenna2, col_delta, row_delta, row_limit, col_limit, result)
 	}
 
 	// Recurse
@@ -205,4 +249,20 @@ func findPossibleAntennas(firstAntenna Antenna, secondAntenna Antenna, col_delta
 	// }
 
 	return false
+}
+
+func resonance(antenna Antenna, row_limit int, col_limit int) {
+	for antenna.col < col_limit && antenna.row < row_limit {
+
+	}
+}
+
+func findPossibleAntennas2(firstAntenna Antenna, secondAntenna Antenna, col_limit int, row_limit int, result *[]Antenna) {
+
+	col_delta := firstAntenna.col - secondAntenna.col
+	row_delta := firstAntenna.row - secondAntenna.row
+	possibleAntenna := Antenna{col: firstAntenna.col - col_delta, row: firstAntenna.row - row_delta, freq: firstAntenna.freq}
+	possibleAntenna2 := Antenna{col: secondAntenna.col + col_delta, row: secondAntenna.row + row_delta, freq: secondAntenna.freq}
+
+	fmt.Println(firstAntenna, secondAntenna)
 }

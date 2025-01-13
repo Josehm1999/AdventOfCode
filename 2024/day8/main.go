@@ -251,10 +251,12 @@ func findPossibleAntennas(firstAntenna Antenna, secondAntenna Antenna, col_delta
 	return false
 }
 
-func resonance(antenna Antenna, row_limit int, col_limit int) {
-	for antenna.col < col_limit && antenna.row < row_limit {
+func resonance(antenna Antenna, row_delta int, col_delta int, row_limit int, col_limit int) []Antenna {
+
+	for antenna.col+col_delta <= col_limit && antenna.row+row_delta <= row_limit {
 
 	}
+	return []Antenna{}
 }
 
 func findPossibleAntennas2(firstAntenna Antenna, secondAntenna Antenna, col_limit int, row_limit int, result *[]Antenna) {
@@ -265,4 +267,7 @@ func findPossibleAntennas2(firstAntenna Antenna, secondAntenna Antenna, col_limi
 	possibleAntenna2 := Antenna{col: secondAntenna.col + col_delta, row: secondAntenna.row + row_delta, freq: secondAntenna.freq}
 
 	fmt.Println(firstAntenna, secondAntenna)
+
+	resonance(possibleAntenna, row_delta, col_delta, row_limit, col_limit)
+	resonance(possibleAntenna2, -row_delta, -col_delta, row_limit, col_limit)
 }

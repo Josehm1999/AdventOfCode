@@ -253,21 +253,30 @@ func findPossibleAntennas(firstAntenna Antenna, secondAntenna Antenna, col_delta
 
 func resonance(antenna Antenna, row_delta int, col_delta int, row_limit int, col_limit int) []Antenna {
 
-	for antenna.col+col_delta <= col_limit && antenna.row+row_delta <= row_limit {
-
+	var antinodes []Antenna
+	// Si la antenna pasa los bordes del maze
+	for antenna.col+col_delta >= 0 && antenna.col+col_delta <= col_limit && antenna.row+row_delta >= 0 && antenna.row+row_delta <= row_limit {
+		antinodes = append(antinodes, Antenna{col: col_delta + antenna.col, row: row_delta + antenna.row, freq: antenna.freq})
+		antenna.col = antenna.col + col_delta
+		antenna.row = antenna.row + row_delta
 	}
-	return []Antenna{}
+	return antinodes
 }
 
 func findPossibleAntennas2(firstAntenna Antenna, secondAntenna Antenna, col_limit int, row_limit int, result *[]Antenna) {
 
 	col_delta := firstAntenna.col - secondAntenna.col
 	row_delta := firstAntenna.row - secondAntenna.row
+
 	possibleAntenna := Antenna{col: firstAntenna.col - col_delta, row: firstAntenna.row - row_delta, freq: firstAntenna.freq}
 	possibleAntenna2 := Antenna{col: secondAntenna.col + col_delta, row: secondAntenna.row + row_delta, freq: secondAntenna.freq}
 
-	fmt.Println(firstAntenna, secondAntenna)
+	// fmt.Println(resonance(possibleAntenna, row_delta, col_delta, row_limit, col_limit))
+	// fmt.Println(resonance(possibleAntenna2, -row_delta, -col_delta, row_limit, col_limit))
 
-	resonance(possibleAntenna, row_delta, col_delta, row_limit, col_limit)
-	resonance(possibleAntenna2, -row_delta, -col_delta, row_limit, col_limit)
+	antinodes1 := resonance(possibleAntenna, row_delta, col_delta, row_limit, col_limit)
+	antinodes2 := resonance(possibleAntenna2, -row_delta, -col_delta, row_limit, col_limit)
+
+	*result = append(*result, antinodes1...)
+	*result = append(*result, antinodes2...)
 }

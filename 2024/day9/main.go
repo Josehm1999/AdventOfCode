@@ -60,40 +60,78 @@ func part1() {
 		}
 	}
 
-	fmt.Println((disk_map_uncompressed))
-	// fmt.Println((disk_map_uncompressed[len(disk_map_uncompressed)-1]))
-	// fmt.Println(free_space_record[len])
-
-	// 1.- Contar cuantas posiciones desde el final se deben de tomar
-	// 2.- Mover caracteres desde la posicion final a una variable temporal mientras no sean .
-
-	// 1.- Find the most right value that isn't a .
-	// 2.- Find the most left value that is a .
-	// 3.- Keep switching until the first left position that is a . and the furthest right position summed up give me the total number of free spaces
-
+	// fmt.Println((disk_map_uncompressed))
 	endpoint := len(disk_map_uncompressed)
 	for _, val := range free_space_record {
 		amount_to_move := val.end - val.start
-		possible_files_to_move := disk_map_uncompressed[endpoint-amount_to_move : endpoint]
+		// possible_files_to_move := disk_map_uncompressed[endpoint-amount_to_move : endpoint]
 
-		for _, val := range possible_files_to_move {
-			if val == "." {
-				possible_files_to_move = disk_map_uncompressed[endpoint-amount_to_move-1 : endpoint-1]
+		// fmt.Println("New line")
+		for i := endpoint - 1; i >= endpoint-amount_to_move; i-- {
+			if disk_map_uncompressed[i] == "." {
+
+				i = i - 1
+				// fmt.Println(disk_map_uncompressed[i])
+				endpoint = endpoint - 1
+				// i--
 			}
+			// fmt.Println(disk_map_uncompressed[i])
+			disk_map_uncompressed[val.start] = disk_map_uncompressed[i]
+			disk_map_uncompressed[i] = "."
+			val.start = val.start + 1
 		}
-		for i, value := range possible_files_to_move {
-			disk_map_uncompressed[val.start+i] = value
-			disk_map_uncompressed[endpoint-amount_to_move+i] = "."
-            fmt.Println()
-		}
+
+		// Get to the first point possible "." then iterate from there until the end
+		// Capture next possible position to move a file if its not possible and has reached the end means its done
+
+		// for _, val := range possible_files_to_move {
+		// 	if val == "." {
+		// 		possible_files_to_move = disk_map_uncompressed[endpoint-amount_to_move-1 : endpoint-1]
+		// 	}
+		// }
+		// for i, value := range possible_files_to_move {
+		// 	disk_map_uncompressed[val.start+i] = value
+		// 	disk_map_uncompressed[endpoint-amount_to_move+i] = "."
+		// }
 
 		// fmt.Println(amount_to_move, possible_files_to_move)
 		endpoint -= amount_to_move
 
-		// fmt.Println(disk_map_uncompressed[len(disk_map_uncompressed)-amount_to_move : len(disk_map_uncompressed)])
 	}
 
-	fmt.Println((disk_map_uncompressed))
+	first_pos_dot := 0
+	for i, ffdot := range disk_map_uncompressed {
+		if ffdot == "." {
+			first_pos_dot = i
+			break
+		}
+	}
+
+	next_available_dot := first_pos_dot
+
+	for j := first_pos_dot; j < len(disk_map_uncompressed); j++ {
+		if disk_map_uncompressed[j] != "." {
+			disk_map_uncompressed[next_available_dot] = disk_map_uncompressed[j]
+			disk_map_uncompressed[j] = "."
+
+			next_available_dot++
+			// fmt.Println(disk_map_uncompressed[j])
+		}
+		// fmt.Println(disk_map_uncompressed[j], next_available_dot)
+	}
+
+	checksum := 0
+	for k, value := range disk_map_uncompressed {
+		if value == "." {
+			break
+		}
+
+		parsed_value, _ := strconv.Atoi(value)
+
+		checksum += k * parsed_value
+	}
+
+	fmt.Println(disk_map_uncompressed,checksum)
 }
 
 func slidingWindow(size int, input []string) [][]string {

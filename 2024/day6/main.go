@@ -117,6 +117,7 @@ func walk(maze [][]string, current Point, horientation *string, counter *int, se
 		// *counter--
 		*horientation = changeHorientation(*horientation)
 	}
+
 	if !(*seen)[current.y][current.x] {
 		*counter++
 	}

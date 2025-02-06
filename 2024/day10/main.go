@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"log"
 	"os"
-	"strconv"
 	"strings"
 )
 
@@ -56,6 +55,8 @@ func part1() {
 	for _, start := range start_points {
 		walk(topo_map, start, &horientation, &counter, &seen)
 	}
+
+	fmt.Println(counter)
 }
 
 func part2() {
@@ -73,7 +74,7 @@ func part2() {
 }
 
 func walk(maze [][]string, current Point, horientation *string, counter *int, seen *[][]bool) bool {
-	fmt.Println(maze, current, *counter, *seen)
+	// fmt.Println(maze, current, *counter, *seen)
 
 	// dirs := map[string][2]int{
 	// 	"up":    {-1, 0},
@@ -93,7 +94,9 @@ func walk(maze [][]string, current Point, horientation *string, counter *int, se
 		return true
 	}
 
-	//Check if the previous number follows the secuence
+    // If all sorounding nums don't follow the secuence and
+
+	//Check if the current number follows the secuence
 
 	//Recurse
 

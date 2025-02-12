@@ -45,9 +45,29 @@
         }
     }
 
-    static bool walk(List<List<char>> todoMap, Point start, string horientation, int counter, List<List<bool>> seen)
+    static bool walk(List<List<char>> topoMap, Point current, string horientation, int counter, List<List<bool>> seen)
     {
-        Console.WriteLine("Entra");
+        // Off the map - bad
+        if (current.row < 0 || current.row >= topoMap[0].Count || current.col < 0 || current.col >= topoMap.Count)
+        {
+            return true;
+        }
+
+        // End of trail - good
+        if (topoMap[current.col][current.row] == '9')
+        {
+            counter++;
+            return true;
+        }
+
+        // Check if seen - just continue
+
+        // If all sorounding nums don't follow the secuence - bad
+
+        // Check if current number follows the secuence add to seen an keep recursing
+
+        // Recurse
+
         return true;
     }
 }

@@ -22,7 +22,8 @@
             {
                 if (inputLines[i][j] == '0')
                 {
-                    var newP = new Point { row = i, col = j };
+                    // Console.WriteLine($"{i},{j}");
+                    var newP = new Point { col = i, row = j };
                     startPoints.Add(newP);
                 }
             }
@@ -36,38 +37,77 @@
             path.Add(tmpPath);
         }
 
-        int counter = 0;
-        string horientation = "down";
+        Dictionary<Point, bool> dups = new Dictionary<Point, bool>();
 
+        var Total = 0;
         foreach (var start in startPoints)
         {
-            Console.WriteLine(walk(topoMap, start, horientation, counter, seen));
+            var results = walk(topoMap, start);
+            results.ForEach(i =>
+            {
+                if (!dups.ContainsKey(i))
+                {
+                    Console.WriteLine($"Trailhead: ({i.col},{i.row})");
+                    dups.Add(i, true);
+                }
+            });
+
+            Total += dups.Count();
+        }
+        Console.WriteLine(Total);
+    }
+
+    static bool IsOffMap(Point current, int width, int height)
+    {
+        return (current.row < 0 || current.row >= width || current.col < 0 || current.col >= height);
+    }
+
+    static int TopoMapGet(List<List<char>> topoMap, Point point)
+    {
+
+        var value = topoMap[point.col][point.row];
+        try
+        {
+            return int.Parse(value.ToString());
+        }
+        catch (System.Exception)
+        {
+            return 0;
         }
     }
 
-    static bool walk(List<List<char>> topoMap, Point current, string horientation, int counter, List<List<bool>> seen)
+    static List<Point> walk(List<List<char>> topoMap, Point current)
     {
-        // Off the map - bad
-        if (current.row < 0 || current.row >= topoMap[0].Count || current.col < 0 || current.col >= topoMap.Count)
-        {
-            return true;
-        }
 
+        var directions = new[] { (-1, 0), (1, 0), (0, -1), (0, 1) };
+        Console.WriteLine($"({current.col}, {current.row})");
         // End of trail - good
-        if (topoMap[current.col][current.row] == '9')
+        if (TopoMapGet(topoMap, current) == 9)
         {
-            counter++;
-            return true;
+            var result = new List<Point>();
+            result.Add(current);
+            return result;
+        }
+        else
+        {
+            // Recurse
+            var result = new List<Point>();
+            foreach ((int row_d, int col_d) direction in directions)
+            {
+                var newPos = new Point { row = current.row + direction.row_d, col = current.col + direction.col_d };
+                var isIt = IsOffMap(newPos, topoMap[0].Count(), topoMap.Count());
+
+                // Console.WriteLine($"({current.col}, {current.row}, {TopoMapGet(topoMap, current)}), ({newPos.col}, {newPos.row}, {(!isIt ? TopoMapGet(topoMap, newPos) : false)}), {isIt}");
+                if (!isIt && TopoMapGet(topoMap, current) + 1 == TopoMapGet(topoMap, newPos))
+                {
+                    // Console.WriteLine($"({newPos.col}, {newPos.row}), ({TopoMapGet(topoMap, current) + 1}| {TopoMapGet(topoMap, newPos)})");
+                    var newList = walk(topoMap, newPos);
+                    result.AddRange(newList);
+                }
+            }
+
+            return result;
         }
 
-        // Check if seen - just continue
-
-        // If all sorounding nums don't follow the secuence - bad
-
-        // Check if current number follows the secuence add to seen an keep recursing
-
-        // Recurse
-
-        return true;
     }
 }

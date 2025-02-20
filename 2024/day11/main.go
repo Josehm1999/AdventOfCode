@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"slices"
 	"strconv"
 	"strings"
 )
@@ -31,31 +32,46 @@ func part1() {
 
 	num_arr := strings.Split(temp[0], " ")
 
-	blink_num := 6
-
+	blink_num := 75
+	last_j := 0
 	for i := 0; i < blink_num; i++ {
-		for j := range num_arr {
+
+		j := 0
+		for j < len(num_arr) {
 
 			if num_arr[j] == "0" {
 				num_arr[j] = "1"
-			} else if len(num_arr[j])%2 == 0 {
+				j++
+			}
+			if len(num_arr[j])%2 == 0 {
 				halfway := len(num_arr[j]) / 2
-				left_stone := num_arr[j][:halfway]
-				right_stone := num_arr[j][halfway:]
+				rStone, _ := strconv.Atoi(num_arr[j][:halfway])
+				lStore, _ := strconv.Atoi(num_arr[j][halfway:])
+				num_arr[j] = strconv.Itoa(lStore)
+				// fmt.Println("Tiene un numero par de caracteres", num_arr[j], halfway, left_stone, right_stone)
+				// test := append([]string{right_stone}, num_arr[j:]...)
+				// num_arr = append(num_arr[:j], test...)
 
-				num_arr[j] = left_stone
-				fmt.Println("Tiene un numero par de caracteres", num_arr[j], halfway, left_stone, right_stone)
-				test := append([]string{right_stone}, num_arr[j:]...)
-				num_arr = append(num_arr[:j], test...)
+				num_arr = slices.Insert(num_arr, j+1, strconv.Itoa(rStone))
+				j += 2
 			} else {
 				num_int, _ := strconv.Atoi(num_arr[j])
-
 				num_arr[j] = strconv.Itoa(num_int * 2024)
+				j++
 			}
-			fmt.Println(i, j)
+			// fmt.Println(i, j)
 		}
+
+		last_j = j
 	}
-	// fmt.Println(num_arr)
+
+	// total := 0
+	// for i := range num_arr {
+	// 	tmp, _ := strconv.Atoi(num_arr[i])
+	//
+	// 	total += tmp
+	// }
+	fmt.Println(last_j)
 }
 
 func part2() {

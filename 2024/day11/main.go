@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"log"
+	"math"
 	"os"
 	"slices"
 	"strconv"
@@ -10,15 +11,45 @@ import (
 )
 
 func main() {
-	part1()
+	part1(25)
+	part2(75)
 }
 
-type Point struct {
-	row int
-	col int
+func set_stones(stone_map *map[int]int, stone int) {
+
+	counter := 1
+	exists, ok := (*stone_map)[stone]
+
+	if ok {
+		counter = exists + 1
+	}
+
+	(*stone_map)[stone] = counter
+
 }
 
-func part1() {
+func exists_stone(stone_map *map[int]int, stone int) int {
+	exists, ok := (*stone_map)[stone]
+
+	if ok {
+		return exists
+	}
+	return 0
+}
+
+func get_digits(num int) int {
+	counter := 0
+	if num == 0 {
+		return 1
+	}
+	for num > 0 {
+		counter += 1
+		num /= 10
+	}
+	return counter
+}
+
+func part1(num_iter int) {
 
 	data, err := os.ReadFile("./input.txt")
 
@@ -32,18 +63,14 @@ func part1() {
 
 	num_arr := strings.Split(temp[0], " ")
 
-	blink_num := 75
-	last_j := 0
-	for i := 0; i < blink_num; i++ {
-
+	for i := 0; i < num_iter; i++ {
 		j := 0
 		for j < len(num_arr) {
 
 			if num_arr[j] == "0" {
 				num_arr[j] = "1"
 				j++
-			}
-			if len(num_arr[j])%2 == 0 {
+			} else if len(num_arr[j])%2 == 0 {
 				halfway := len(num_arr[j]) / 2
 				rStone, _ := strconv.Atoi(num_arr[j][:halfway])
 				lStore, _ := strconv.Atoi(num_arr[j][halfway:])
@@ -61,20 +88,46 @@ func part1() {
 			}
 			// fmt.Println(i, j)
 		}
-
-		last_j = j
 	}
 
-	// total := 0
-	// for i := range num_arr {
-	// 	tmp, _ := strconv.Atoi(num_arr[i])
-	//
-	// 	total += tmp
-	// }
-	fmt.Println(last_j)
+	fmt.Println(len(num_arr))
 }
 
-func part2() {
+func evalate_stones(stones_map map[int]int) map[int]int {
+
+	result := make(map[int]int)
+	for key, val := range stones_map {
+		// fmt.Println(key, val)
+		if key == 0 {
+			new_stone := 1
+			result[new_stone] = exists_stone(&result, new_stone) + val
+		} else {
+			num_digits := get_digits(key)
+			if num_digits%2 == 0 {
+
+				half_len := num_digits / 2
+				padding := int(math.Pow(10, float64(half_len)))
+
+				lower_part := key / padding
+				high_part := key % padding
+
+				// fmt.Println("test", key, half_len, padding, high_part, lower_part)
+				lower_count := exists_stone(&result, lower_part) + val
+				result[lower_part] = lower_count
+
+				higher_count := exists_stone(&result, high_part) + val
+				result[high_part] = higher_count
+
+			} else {
+				new_stone := key * 2024
+				result[new_stone] = exists_stone(&result, new_stone) + val
+			}
+		}
+	}
+	return result
+}
+
+func part2(num_iter int) {
 	data, err := os.ReadFile("./input.txt")
 
 	if err != nil {
@@ -85,90 +138,25 @@ func part2() {
 
 	temp := strings.Split(file, "\n")
 
-	var start_points []Point
-	var topo_map [][]string
-
-	for i, v := range temp {
-		stringArr := strings.Split(v, "")
-		for j, val := range stringArr {
-			if val == "0" {
-				start_points = append(start_points, Point{row: i, col: j})
-			}
-		}
-		topo_map = append(topo_map, stringArr)
+	string_arr := strings.Split(temp[0], " ")
+	var num_arr []int
+	for _, val := range string_arr {
+		num, _ := strconv.Atoi(val)
+		num_arr = append(num_arr, num)
 	}
 
-	counter := 0
-	// Start from every 0 position
-
-	for _, start := range start_points {
-		result := walk(topo_map, start)
-		counter += len((result))
+	result := make(map[int]int)
+	for _, val := range num_arr {
+		set_stones(&result, val)
 	}
 
-	fmt.Println(counter)
-}
-
-func removeDuplicate(sliceList []Point) []Point {
-	allKeys := make(map[string]bool)
-	list := []Point{}
-
-	for _, item := range sliceList {
-		key := fmt.Sprintf("%v,%v", item.col, item.row)
-
-		if _, value := allKeys[key]; !value {
-			allKeys[key] = true
-			list = append(list, item)
-		}
+	for i := 0; i < num_iter; i++ {
+		result = evalate_stones(result)
+	}
+	total := 0
+	for _, val := range result {
+		total += val
 	}
 
-	return list
-}
-func isOffMap(current Point, width int, height int) bool {
-
-	return current.row < 0 || current.row >= height || current.col < 0 || current.col >= width
-}
-func topoMapGet(topoMap [][]string, point Point) int {
-	mapValue := topoMap[point.row][point.col]
-
-	parsedValue, err := strconv.Atoi(mapValue)
-
-	if err != nil {
-		return 0
-	} else {
-		return parsedValue
-	}
-}
-func walk(topoMap [][]string, current Point) []Point {
-
-	dirs := [4][2]int{
-		{-1, 0},
-		{1, 0},
-		{0, -1},
-		{0, 1},
-	}
-
-	var result []Point
-	if topoMapGet(topoMap, current) == 9 {
-		// fmt.Println(current, topoMapGet(topoMap, current))
-		return append(result, current)
-	} else {
-
-		//Recurse
-		for _, value := range dirs {
-			nextPoint := Point{col: current.col + value[1], row: current.row + value[0]}
-
-			//Check if the new point is out of bounds
-			isIt := isOffMap(nextPoint, len(topoMap)-1, len(topoMap[0]))
-			//Check if the current number follows the secuence
-			if !isIt && topoMapGet(topoMap, current)+1 == topoMapGet(topoMap, nextPoint) {
-				// fmt.Println(current, nextPoint, topoMapGet(topoMap, current), topoMapGet(topoMap, nextPoint))
-				newList := walk(topoMap, nextPoint)
-				result = append(result, newList...)
-			}
-		}
-
-		return result
-	}
-
+	fmt.Println(total)
 }

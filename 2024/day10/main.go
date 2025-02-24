@@ -129,7 +129,6 @@ func walk(topoMap [][]string, current Point) []Point {
 
 	var result []Point
 	if topoMapGet(topoMap, current) == 9 {
-		// fmt.Println(current, topoMapGet(topoMap, current))
 		return append(result, current)
 	} else {
 
@@ -149,5 +148,4 @@ func walk(topoMap [][]string, current Point) []Point {
 
 		return result
 	}
-
 }

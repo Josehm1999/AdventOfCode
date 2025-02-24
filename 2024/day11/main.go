@@ -25,7 +25,6 @@ func set_stones(stone_map *map[int]int, stone int) {
 	}
 
 	(*stone_map)[stone] = counter
-
 }
 
 func exists_stone(stone_map *map[int]int, stone int) int {

@@ -98,6 +98,25 @@ func removeDuplicate(sliceList []Point) []Point {
 	return list
 }
 
+func removeDuplicateArrOfArr(sliceList [][]Point) [][]Point {
+	allKeys := make(map[string]bool)
+	list := [][]Point{}
+
+	for _, item := range sliceList {
+		var line_key string
+		for _, nested_item := range item {
+			key := fmt.Sprintf("%v,%v", nested_item.col, nested_item.row)
+			line_key += key
+		}
+
+		if _, value := allKeys[line_key]; !value {
+			allKeys[line_key] = true
+			list = append(list, item)
+		}
+	}
+	return list
+}
+
 func part1() {
 
 	data, err := os.ReadFile("./input.txt")
@@ -191,46 +210,77 @@ func part2() {
 
 	total := 0
 
-	// for t := range garden_sections {
-	// 	for x := range garden_sections[t] {
-	// 		for y := x + 1; y < len(garden_sections[t]); y++ {
-	// 			// fmt.Println(garden_sections[t][x], garden_sections[t][y])
-	// 			if garden_sections[t][x].row == garden_sections[t][y].row && garden_sections[t][x].col < garden_sections[t][y].col {
-	// 				garden_sections[t][x].col = garden_sections[t][y].col
-	// 			}
-	// 		}
-	// 	}
-	// 	// garden_sections[t] = removeDuplicate(garden_sections[t])
-	// }
-	//
-	// fmt.Println(garden_sections)
+	map_arr := make(map[string][][]Point)
 
-	for k := range garden_sections {
-		current_zone := 0
-		curr_area := len(garden_sections[k])
-		// garden_sections[k] = removeDuplicate(garden_sections[k])
-		// fmt.Println(garden_sections[k])
-		for p := range garden_sections[k] {
-			current_counter := 0
-			for q := range garden_sections[k] {
+	for t := range garden_sections {
+		var arr_arr [][]Point
+		curr_letter := garden_map_get(garden_map, garden_sections[t][0])
+		// arr = append(arr, garden_sections[t][0])
+		for x := range garden_sections[t] {
+			var arr []Point
+			for y := range garden_sections[t] {
+				// fmt.Println(garden_sections[t][x], garden_sections[t][y])
 
-				operation_col := (garden_sections[k][p].col - garden_sections[k][q].col)
-				operation_row := (garden_sections[k][p].row - garden_sections[k][q].row)
-				operation := math.Abs(float64(operation_col)) + math.Abs(float64(operation_row))
-				if math.Abs(float64(operation)) == 1 {
-					current_counter++
-
-					if garden_sections[k][p].row == garden_sections[k][q].row {
-						current_counter++
-					}
+				if garden_sections[t][x].row == garden_sections[t][y].row {
+					// fmt.Println(garden_sections[t][x])
+					arr = append(arr, garden_sections[t][y])
 				}
 			}
-			current_zone += 4 - current_counter
+			arr_arr = append(arr_arr, arr)
 		}
-
-		total += curr_area * current_zone
-		// fmt.Println(garden_map_get(garden_map, garden_sections[k][0]), curr_area, current_zone)
+		arr_arr = removeDuplicateArrOfArr(arr_arr)
+		key := fmt.Sprintf("%v,%v", curr_letter, t)
+		map_arr[key] = arr_arr
 	}
+	//
+	// fmt.Println(map_arr["B"])
+
+	// No esta evaluando bien los puntos de conexion de la fila con las columnas
+	for k := range map_arr {
+		fmt.Println(map_arr[k])
+		if len(map_arr[k]) == 1 {
+			// fmt.Println(k, map_arr[k][0])
+			total += 4 * len(map_arr[k][0])
+		} else {
+			max_perimeter := len(map_arr[k]) * 4
+			count := 0
+			for _, item := range map_arr[k] {
+				max_perimeter -= len(item)
+				count += len(item)
+
+				// fmt.Println(k, item)
+			}
+
+			total += max_perimeter * count
+			// fmt.Println(k, max_perimeter, len(map_arr[k]))
+		}
+	}
+	// for k := range garden_sections {
+	// 	current_zone := 0
+	// 	curr_area := len(garden_sections[k])
+	// 	// garden_sections[k] = removeDuplicate(garden_sections[k])
+	// 	// fmt.Println(garden_sections[k])
+	// 	for p := range garden_sections[k] {
+	// 		current_counter := 0
+	// 		for q := range garden_sections[k] {
+	//
+	// 			operation_col := (garden_sections[k][p].col - garden_sections[k][q].col)
+	// 			operation_row := (garden_sections[k][p].row - garden_sections[k][q].row)
+	// 			operation := math.Abs(float64(operation_col)) + math.Abs(float64(operation_row))
+	// 			if math.Abs(float64(operation)) == 1 {
+	// 				current_counter++
+	//
+	// 				if garden_sections[k][p].row == garden_sections[k][q].row {
+	// 					// current_counter += 2
+	// 				}
+	// 			}
+	// 		}
+	// 		current_zone += 4 - current_counter
+	// 	}
+	//
+	// 	total += curr_area * current_zone
+	// 	// fmt.Println(garden_map_get(garden_map, garden_sections[k][0]), curr_area, current_zone)
+	// }
 
 	fmt.Println(total)
 }

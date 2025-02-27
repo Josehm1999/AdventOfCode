@@ -222,39 +222,44 @@ func part2() {
 
 			// fmt.Println(k, map_arr[k])
 			//First list to iterate
-			// line_count := 0
+			line_count := 0
 			items_count := 0
 			for i, item := range map_arr[k] {
-				fmt.Println(k, i, item)
-				// initial_sides_count := 4
+				initial_sides_count := 4
 				// //First list items
 				for _, nested_item := range item {
-					fmt.Println(nested_item)
-					//
+					// fmt.Println(nested_item)
+
 					items_count++
-					// 	//Second list to iterate
-					// 	for j, item_second_list := range map_arr[k] {
-					// 		// Secord list items
-					// 		if i != j {
-					// 			for _, nested_item_second_list := range item_second_list {
-					// 				// fmt.Println(key)
-					// 				operation_col := (nested_item.col - nested_item_second_list.col)
-					// 				operation_row := (nested_item.row - nested_item_second_list.row)
-					// 				operation := math.Abs(float64(operation_col)) + math.Abs(float64(operation_row))
-					//
-					// 				if math.Abs(float64(operation)) == 1 {
-					// 					initial_sides_count--
-					// 				}
-					// 			}
-					// 		}
+					// Second list to iterate
+					for j, item_second_list := range map_arr[k] {
+						// Secord list items
+
+						if i != j {
+							for _, nested_item_second_list := range item_second_list {
+								// 				// fmt.Println(key)
+								operation_col := (nested_item.col - nested_item_second_list.col)
+								operation_row := (nested_item.row - nested_item_second_list.row)
+								operation := math.Abs(float64(operation_col)) + math.Abs(float64(operation_row))
+
+								if math.Abs(float64(operation)) == 1 {
+									fmt.Println(k, i, item)
+									if nested_item_second_list.col == nested_item.col {
+										fmt.Println("aqui", k, i, nested_item_second_list, nested_item)
+										initial_sides_count--
+									}
+								}
+							}
+						}
+					}
 				}
 				// }
 				//
 				// // fmt.Println(initial_sides_count)
-				// line_count += initial_sides_count
+				line_count += initial_sides_count
 			}
 			fmt.Println(k, items_count)
-			// total += line_count * items_count
+			total += line_count * items_count
 			// 		// fmt.Println(k, max_perimeter, len(map_arr[k]))
 		}
 	}

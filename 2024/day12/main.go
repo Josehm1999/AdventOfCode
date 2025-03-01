@@ -5,6 +5,7 @@ import (
 	"log"
 	"math"
 	"os"
+	"slices"
 	"strings"
 )
 
@@ -45,11 +46,9 @@ func walk(garden_map [][]string, current Point, seen *map[Point]bool) []Point {
 	for _, value := range dirs {
 		next_point := Point{col: current.col + value[1], row: current.row + value[0]}
 		isIt := isOffMap(next_point, len(garden_map[0]), len(garden_map)-1)
-		if !isIt {
-			if garden_map_get(garden_map, current) == garden_map_get(garden_map, next_point) && !(*seen)[next_point] {
-				new_line := walk(garden_map, next_point, seen)
-				result = append(result, new_line...)
-			}
+		if !isIt && garden_map_get(garden_map, current) == garden_map_get(garden_map, next_point) && !(*seen)[next_point] {
+			new_line := walk(garden_map, next_point, seen)
+			result = append(result, new_line...)
 		}
 	}
 
@@ -149,6 +148,27 @@ func part1() {
 	fmt.Println(total)
 }
 
+func exists_in_garden(sliceList []Point, coords []Point) []int {
+
+	var res_arr []int
+	for _, value := range coords {
+
+		exists := false
+		for _, list_val := range sliceList {
+			if value == list_val {
+				exists = true
+			}
+		}
+
+		if exists {
+			res_arr = append(res_arr, 1)
+		} else {
+			res_arr = append(res_arr, 0)
+		}
+	}
+	return res_arr
+}
+
 func part2() {
 	data, err := os.ReadFile("./input.txt")
 
@@ -167,7 +187,6 @@ func part2() {
 		}
 	}
 
-	//Start from 0,0
 	seen := make(map[Point]bool)
 	var garden_sections [][]Point
 	for i := range garden_map {
@@ -176,7 +195,6 @@ func part2() {
 			_, ok := seen[current_point]
 			if !ok {
 				line_result := walk(garden_map, current_point, &seen)
-				// fmt.Println(line_result)
 				garden_sections = append(garden_sections, line_result)
 			}
 		}
@@ -184,131 +202,73 @@ func part2() {
 
 	total := 0
 
-	map_arr := make(map[string][][]Point)
-
-	for t := range garden_sections {
-		var arr_arr [][]Point
-		curr_letter := garden_map_get(garden_map, garden_sections[t][0])
-		// arr = append(arr, garden_sections[t][0])
-		for x := range garden_sections[t] {
-			var arr []Point
-			for y := range garden_sections[t] {
-				// fmt.Println(garden_sections[t][x], garden_sections[t][y])
-
-				if garden_sections[t][x].row == garden_sections[t][y].row {
-					// fmt.Println(garden_sections[t][x])
-					arr = append(arr, garden_sections[t][y])
-				}
-			}
-			arr_arr = append(arr_arr, arr)
+	for _, line := range garden_sections {
+		mini, maxi, minj, maxj := find_bounding_box(line)
+		arr_corners := [][]int{
+			{1, 0, 0, 0},
+			{0, 1, 0, 0},
+			{0, 0, 1, 0},
+			{0, 0, 0, 1},
+			{1, 1, 1, 0},
+			{1, 1, 0, 1},
+			{1, 0, 1, 1},
+			{0, 1, 1, 1},
 		}
-		arr_arr = removeDuplicateArrOfArr(arr_arr)
-		key := fmt.Sprintf("%v,%v", curr_letter, t)
-		map_arr[key] = arr_arr
-	}
 
-	// for k := range map_arr {
-	// 	fmt.Println(map_arr[k])
-	// }
+		arr_double_corners := [][]int{
+			{1, 0, 0, 1},
+			{0, 1, 1, 0},
+		}
 
-	// fmt.Println(map_arr["B"])
+		item_corner := 0
 
-	// No esta evaluando bien los puntos de conexion de la fila con las columnas
-	for k := range map_arr {
-		if len(map_arr[k]) == 1 {
-			// fmt.Println(k, map_arr[k][0])
-			total += 4 * len(map_arr[k][0])
-		} else {
-
-			// fmt.Println(k, map_arr[k])
-			//First list to iterate
-			line_count := 0
-			items_count := 0
-			for i, item := range map_arr[k] {
-				initial_sides_count := 4
-				// //First list items
-				for _, nested_item := range item {
-					// fmt.Println(nested_item)
-
-					items_count++
-					// Second list to iterate
-					for j, item_second_list := range map_arr[k] {
-						// Secord list items
-
-						if i != j {
-							for _, nested_item_second_list := range item_second_list {
-								// 				// fmt.Println(key)
-								operation_col := (nested_item.col - nested_item_second_list.col)
-								operation_row := (nested_item.row - nested_item_second_list.row)
-								operation := math.Abs(float64(operation_col)) + math.Abs(float64(operation_row))
-
-								if math.Abs(float64(operation)) == 1 {
-									fmt.Println(k, i, item)
-									if nested_item_second_list.col == nested_item.col {
-										fmt.Println("aqui", k, i, nested_item_second_list, nested_item)
-										initial_sides_count--
-									}
-								}
-							}
-						}
+		for rows := mini - 1; rows <= maxi; rows++ {
+			for cols := minj - 1; cols <= maxj; cols++ {
+				res := exists_in_garden(line, []Point{{row: rows, col: cols}, {row: rows + 1, col: cols}, {row: rows, col: cols + 1}, {row: rows + 1, col: cols + 1}})
+				for _, poss_cor := range arr_corners {
+					if slices.Equal(poss_cor, res) {
+						item_corner++
 					}
 				}
-				// }
-				//
-				// // fmt.Println(initial_sides_count)
-				line_count += initial_sides_count
+				for _, poss_double_cor := range arr_double_corners {
+					if slices.Equal(poss_double_cor, res) {
+						item_corner += 2
+					}
+				}
 			}
-			fmt.Println(k, items_count)
-			total += line_count * items_count
-			// 		// fmt.Println(k, max_perimeter, len(map_arr[k]))
 		}
+
+		total += item_corner * len(line)
 	}
-	// for k := range garden_sections {
-	// 	current_zone := 0
-	// 	curr_area := len(garden_sections[k])
-	// 	// garden_sections[k] = removeDuplicate(garden_sections[k])
-	// 	// fmt.Println(garden_sections[k], is_one_line(garden_sections[k]))
-	//
-	// 	for p := range garden_sections[k] {
-	// 		current_counter := 0
-	// 		// visited_row := 999
-	// 		// visited_col := 999
-	// 		// current_col := garden_sections[k][p].col
-	// 		for q := range garden_sections[k] {
-	// 			operation_col := (garden_sections[k][p].col - garden_sections[k][q].col)
-	// 			operation_row := (garden_sections[k][p].row - garden_sections[k][q].row)
-	// 			operation := math.Abs(float64(operation_col)) + math.Abs(float64(operation_row))
-	// 			if math.Abs(float64(operation)) == 1 {
-	// 				// fmt.Println(visited_row)
-	// 				current_counter++
-	//
-	// 				// if garden_sections[k][p].row == garden_sections[k][q].row {
-	// 				// 	current_counter++
-	// 				// }
-	// 			}
-	// 		}
-	// 		current_zone += 4 - current_counter
-	// 		// fmt.Println(current_zone)
-	// 	}
-	// 	total += curr_area * current_zone
-	// 	fmt.Println(garden_map_get(garden_map, garden_sections[k][0]), curr_area, current_zone)
-	// }
-	// }
 
 	fmt.Println(total)
 }
 
-func is_one_line(line []Point) bool {
+func find_bounding_box(line []Point) (mini, maxi, minj, maxj int) {
 
-	curr_row := 0
-	for i, val := range line {
-		if i == 0 {
-			curr_row = val.row
-		} else {
-			if curr_row != val.row {
-				return false
-			}
+	if len(line) > 0 {
+		mini, maxi = line[0].row, line[0].row
+		minj, maxj = line[0].col, line[0].col
+	} else {
+		return 0, 0, 0, 0
+	}
+
+	for _, point := range line {
+		i, j := point.row, point.col
+
+		if i < mini {
+			mini = i
+		}
+		if i > maxi {
+			maxi = i
+		}
+		if j < minj {
+			minj = j
+		}
+		if j > maxj {
+			maxj = j
 		}
 	}
-	return true
+
+	return mini, maxi, minj, maxj
 }

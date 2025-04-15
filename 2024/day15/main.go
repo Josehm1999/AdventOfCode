@@ -17,23 +17,107 @@ type Point struct {
 	row int
 }
 
-func walk(maze [][]string, start_position Point, instructions *[]string, seen *[][]bool) bool {
+func loop_on_box() {
+
+}
+
+func walk(maze [][]string, current Point, instructions *[]string, seen *[][]bool) bool {
 
 	dirs := map[string][2]int{
-		"^": {0, -1},
-		"v": {0, 1},
-		"<": {-1, 0},
-		">": {1, 0},
+		"^": {-1, 0},
+		"v": {1, 0},
+		"<": {0, -1},
+		">": {0, 1},
 	}
 
+	// fmt.Println(maze[current.row][current.col])
 	// No more instructions to execute we finished
+	// fmt.Println(current.col, current.row)
 	if len(*instructions) == 0 {
 		return true
 	}
+	current_instruction := (*instructions)[len(*instructions)-1]
 
-    if maze[start_position.col][start_position.row] == "#" {
+	if maze[current.row][current.col] == "#" {
+		switch current_instruction {
+		case "<":
+			current.col = current.col + dirs[">"][1]
+			current.row = current.row + dirs[">"][0]
+		case ">":
+			current.col = current.col + dirs["<"][1]
+			current.row = current.row + dirs["<"][0]
+		case "^":
+			current.col = current.col + dirs["v"][1]
+			current.row = current.row + dirs["v"][0]
+		case "v":
+			current.col = current.col + dirs["^"][1]
+			current.row = current.row + dirs["^"][0]
+		}
 
-    }
+		// Si se choca con una pared se regresa a la posicion a la que estaba
+	}
+
+	(*instructions) = (*instructions)[:len(*instructions)-1]
+	if len((*instructions)) > 0 {
+		current_instruction = (*instructions)[len(*instructions)-1]
+	}
+
+	curr_symbol := maze[current.row][current.col]
+	next_symbol := maze[current.row+dirs[current_instruction][0]][current.col+dirs[current_instruction][1]]
+
+	if (curr_symbol == "." || curr_symbol == "@") && next_symbol == "." {
+		maze[current.row][current.col] = "."
+		maze[current.row+dirs[current_instruction][0]][current.col+dirs[current_instruction][1]] = "@"
+	}
+
+	if curr_symbol == "@" && next_symbol == "O" {
+
+		after_next_symbol := maze[current.row+(dirs[current_instruction][0]*2)][current.col+(dirs[current_instruction][1]*2)]
+		if after_next_symbol == "." {
+			maze[current.row][current.col] = "."
+			maze[current.row+(dirs[current_instruction][0])][current.col+dirs[current_instruction][1]] = "@"
+			maze[current.row+(dirs[current_instruction][0]*2)][current.col+(dirs[current_instruction][1]*2)] = "O"
+		}
+
+		if after_next_symbol == "O" {
+			// fmt.Println("Empieza recursividad de nuevo")
+			llego_al_punto_o_hashtag := false
+			is_dot := false
+			multiplier := 2
+			var lastPoint Point
+			for !llego_al_punto_o_hashtag {
+				// fmt.Println(current.row+(dirs[current_instruction][0]*multiplier), current.col+(dirs[current_instruction][1]*multiplier))
+				if maze[current.row+(dirs[current_instruction][0]*multiplier)][current.col+(dirs[current_instruction][1]*multiplier)] == "#" {
+					lastPoint = Point{row: current.row + (dirs[current_instruction][0] * multiplier), col: current.col + (dirs[current_instruction][1] * multiplier)}
+					llego_al_punto_o_hashtag = true
+				}
+				if maze[current.row+(dirs[current_instruction][0]*multiplier)][current.col+(dirs[current_instruction][1]*multiplier)] == "." {
+					is_dot = true
+					lastPoint = Point{row: current.row + (dirs[current_instruction][0] * multiplier), col: current.col + (dirs[current_instruction][1] * multiplier)}
+					llego_al_punto_o_hashtag = true
+				}
+				multiplier = multiplier + 1
+			}
+
+			if is_dot {
+				// Falta hacer si es validacion vertical
+				for i := lastPoint.col; i >= current.col; i-- {
+					// fmt.Println(maze[lastPoint.row][i])
+					pivot := maze[lastPoint.row][i]
+					maze[lastPoint.row][i] = maze[lastPoint.row][i-1]
+					maze[lastPoint.row][i-1] = pivot
+				}
+			}
+
+			// fmt.Println(current.col, current.row, is_dot, is_hashtag, lastPoint)
+		}
+	}
+
+	if (walk(maze, Point{col: current.col + dirs[current_instruction][1], row: current.row + dirs[current_instruction][0]}, instructions, seen)) {
+
+		// fmt.Println(current.col, current.row, maze[current.row][current.col])
+		return true
+	}
 	return false
 }
 
@@ -71,12 +155,19 @@ func part1() {
 		path = append(path, tmp_path)
 	}
 
-	robot_y := current_robot_position / len(maze_string_arr)
+	robot_x := current_robot_position / len(maze_string_arr)
 	// Se resta el numero de filas hasta llegar al robot @ para tener en consideracion los saltos de linea que descuadra el calculo
-	robot_x := (current_robot_position % len(maze_string_arr)) - robot_y
+	robot_y := (current_robot_position % len(maze_string_arr)) - robot_x
 
-	fmt.Println(robot_y, robot_x, instructions_arr)
+	// fmt.Println(robot_y, robot_x, instructions_arr, len(maze), len(maze[0]))
 	walk(maze, Point{col: robot_y, row: robot_x}, &instructions_arr, &seen)
+
+	for _, v := range maze {
+		for _, mv := range v {
+			fmt.Print(mv)
+		}
+		fmt.Println()
+	}
 }
 
 func part2() {

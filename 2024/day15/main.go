@@ -52,6 +52,10 @@ func walk(maze [][]string, current Point, instructions *[]string, seen *[][]bool
 		// Si se choca con una pared se regresa a la posicion a la que estaba
 	}
 
+    if maze[current.row][current.col] == "." {
+        
+    }
+
 	(*instructions) = (*instructions)[:len(*instructions)-1]
 	if len((*instructions)) > 0 {
 		current_instruction = (*instructions)[len(*instructions)-1]

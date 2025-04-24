@@ -200,7 +200,7 @@ func walk2(maze [][]string, current Point, instructions *[]string, seen *[][]boo
 		return true
 	}
 	current_instruction := (*instructions)[len(*instructions)-1]
-
+	fmt.Println(current_instruction)
 	if maze[current.row][current.col] == "#" {
 		current = back_one_position(current, current_instruction, dirs)
 	}
@@ -554,6 +554,7 @@ func validate_to_right(maze *[][]string, current *Point, current_instruction str
 		}
 
 		rsymbol_to_check := (*maze)[current.row+dirs[current_instruction][0]*multiplier][current.col+r_multiplier]
+		current_symbol := (*maze)[current.row+dirs[current_instruction][0]*(multiplier-1)][current.col]
 
 		if rsymbol_to_check == "." || rsymbol_to_check == "#" {
 			ended = true
@@ -565,26 +566,35 @@ func validate_to_right(maze *[][]string, current *Point, current_instruction str
 			// 	fmt.Println(Point{row: current.row + dirs[current_instruction][0]*multiplier, col: current.col + r_multiplier})
 			// }
 			if rsymbol_to_check == "[" {
-
-				extra_check := (*maze)[current.row][current.col+r_multiplier]
-				extra_check_2 := (*maze)[current.row][current.col+r_multiplier+1]
-
-				if extra_check == "[" || extra_check == "]" || extra_check_2 == "[" || extra_check_2 == "]" {
+				// 	//
+				// extra_check := (*maze)[current.row][current.col+r_multiplier]
+				// 	extra_check_2 := (*maze)[current.row][current.col+r_multiplier+1]
+				if r_multiplier == 1 && current_symbol != "]" {
 					points_to_validate = append(points_to_validate, Point{row: current.row + dirs[current_instruction][0]*multiplier, col: current.col + r_multiplier})
 				}
-				// fmt.Println(extra_check, extra_check_2, current.col+r_multiplier, current.col+r_multiplier+1)
+				if r_multiplier == 0 {
+					points_to_validate = append(points_to_validate, Point{row: current.row + dirs[current_instruction][0]*multiplier, col: current.col + r_multiplier})
+				}
+				// 	// 	// fmt.Println(extra_check, extra_check_2, current.col+r_multiplier, current.col+r_multiplier+1)
 			}
-
+			// //
 			if rsymbol_to_check == "]" {
-
-				extra_check := (*maze)[current.row][current.col+r_multiplier]
-				extra_check_2 := (*maze)[current.row][current.col+r_multiplier-1]
-
-				if extra_check == "[" || extra_check == "]" || extra_check_2 == "[" || extra_check_2 == "]" {
+				if r_multiplier-1 == 0 {
 					points_to_validate = append(points_to_validate, Point{row: current.row + dirs[current_instruction][0]*multiplier, col: current.col + r_multiplier})
 				}
-				// fmt.Println(extra_check, extra_check_2, current.col+r_multiplier, current.col+r_multiplier+1)
+				if r_multiplier-2 == 0 && current_symbol != "]" {
+					points_to_validate = append(points_to_validate, Point{row: current.row + dirs[current_instruction][0]*multiplier, col: current.col + r_multiplier})
+				}
+				// 	//
+				// 	extra_check := (*maze)[current.row][current.col+r_multiplier]
+				// 	extra_check_2 := (*maze)[current.row][current.col+r_multiplier-1]
+				// 	//
+				// 	if extra_check != "." && extra_check_2 != "." {
+				// 	}
+				// 	// 	// fmt.Println(extra_check, extra_check_2, current.col+r_multiplier, current.col+r_multiplier+1)
 			}
+
+			// points_to_validate = append(points_to_validate, Point{row: current.row + dirs[current_instruction][0]*multiplier, col: current.col + r_multiplier})
 			// if extra_check != "." && (extra_check_2 == "[" || extra_check_2 == "]") {
 			// }
 		}
@@ -625,39 +635,33 @@ func validate_to_left(maze *[][]string, current *Point, current_instruction stri
 	}
 	for !ended {
 		lsymbol_to_check := (*maze)[current.row+dirs[current_instruction][0]*multiplier][current.col+l_multiplier]
+		current_symbol := (*maze)[current.row+dirs[current_instruction][0]*(multiplier-1)][current.col]
 		// fmt.Println(lsymbol_to_check,current.row+dirs[current_instruction][0]*multiplier, current.col+l_multiplier, current.row, multiplier, dirs[current_instruction][0])
 		// fmt.Println(lsymbol_to_check, (*maze)[2][5], current.row+dirs[current_instruction][0]*multiplier, current.col+l_multiplier)
 		if lsymbol_to_check == "[" || lsymbol_to_check == "]" {
 			// fmt.Println(Point{row: current.row + dirs[current_instruction][0]*multiplier, col: current.col + l_multiplier})
 
 			if lsymbol_to_check == "[" {
-
-				extra_check := (*maze)[current.row][current.col+l_multiplier]
-				extra_check_2 := (*maze)[current.row][current.col+l_multiplier+1]
-
-				if l_multiplier != 0 && (extra_check == "[" || extra_check == "]" || extra_check_2 == "[" || extra_check_2 == "]") {
+				if l_multiplier+1 == 0 {
+					points_to_validate = append(points_to_validate, Point{row: current.row + dirs[current_instruction][0]*multiplier, col: current.col + l_multiplier})
+				}
+				if l_multiplier+2 == 0 && current_symbol != "[" {
 					points_to_validate = append(points_to_validate, Point{row: current.row + dirs[current_instruction][0]*multiplier, col: current.col + l_multiplier})
 				}
 				if l_multiplier == 0 {
 					points_to_validate = append(points_to_validate, Point{row: current.row + dirs[current_instruction][0]*multiplier, col: current.col + l_multiplier})
 				}
-				fmt.Println(extra_check, extra_check_2, current.col+l_multiplier, current.col+l_multiplier+1)
+				// 	fmt.Println(extra_check, extra_check_2, current.col+l_multiplier, current.col+l_multiplier+1)
 			}
-
 			if lsymbol_to_check == "]" {
-
-				extra_check := (*maze)[current.row][current.col+l_multiplier]
-				extra_check_2 := (*maze)[current.row][current.col+l_multiplier-1]
-
-				if l_multiplier != 0 && (extra_check == "[" || extra_check == "]" || extra_check_2 == "[" || extra_check_2 == "]") {
+				if l_multiplier+1 == 0 && current_symbol != "[" {
 					points_to_validate = append(points_to_validate, Point{row: current.row + dirs[current_instruction][0]*multiplier, col: current.col + l_multiplier})
 				}
-
 				if l_multiplier == 0 {
 					points_to_validate = append(points_to_validate, Point{row: current.row + dirs[current_instruction][0]*multiplier, col: current.col + l_multiplier})
 				}
-				// fmt.Println(extra_check, extra_check_2, current.col+l_multiplier, current.col+l_multiplier+1)
 			}
+
 		}
 		if lsymbol_to_check == "." || lsymbol_to_check == "#" {
 			ended = true
@@ -709,7 +713,7 @@ func move_for_instructions_up_down(maze *[][]string, current *Point, current_ins
 		// fmt.Println(points_to_validate)
 		dot_count := 0
 
-		// fmt.Println(points_to_validate)
+		fmt.Println(points_to_validate)
 		for i, v := range points_to_validate {
 			// fmt.Println((*maze)[v.row+dirs[current_instruction][0]][v.col], v.row+dirs[current_instruction][0], v.col)
 			if (*maze)[v.row+dirs[current_instruction][0]][v.col] == "#" {

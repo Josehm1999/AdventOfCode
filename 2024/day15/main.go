@@ -232,7 +232,9 @@ func walk2(maze [][]string, current Point, instructions *[]string, seen *[][]boo
 		if current_instruction == "<" || current_instruction == ">" {
 			move_for_instructions_left_right(&maze, &current, current_instruction, dirs)
 		} else {
+			tmp := current.col
 			move_for_instructions_up_down(&maze, &current, current_instruction, dirs)
+			current.col = tmp
 		}
 	}
 
@@ -627,34 +629,100 @@ func validate_right(maze *[][]string, current *Point, current_instruction string
 	}
 
 	prev_symbol = (*maze)[(*current).row+dirs[current_instruction][0]*(multiplier-1)][(*current).col+modifier]
+	r_first_symbol = (*maze)[(*current).row+dirs[current_instruction][0]*multiplier][(*current).col+modifier]
+	fmt.Println(prev_symbol, r_first_symbol, multiplier)
 	if prev_symbol == "[" {
 		if r_first_symbol == "[" {
-			points_to_validate = append(points_to_validate, Point{row: current.row + dirs[current_instruction][0]*multiplier, col: current.col})
-			points_to_validate = append(points_to_validate, Point{row: current.row + dirs[current_instruction][0]*multiplier, col: current.col + 1})
+			// fmt.Println(Point{row: current.row + dirs[current_instruction][0]*multiplier, col: current.col}, Point{row: current.row + dirs[current_instruction][0]*multiplier, col: current.col + 1})
+			points_to_validate = append(points_to_validate, Point{row: current.row + dirs[current_instruction][0]*multiplier, col: current.col + modifier})
+			points_to_validate = append(points_to_validate, Point{row: current.row + dirs[current_instruction][0]*multiplier, col: current.col + 1 + modifier})
 		}
 
 		if r_first_symbol == "]" {
-			points_to_validate = append(points_to_validate, Point{row: current.row + dirs[current_instruction][0]*multiplier, col: current.col})
-			points_to_validate = append(points_to_validate, Point{row: current.row + dirs[current_instruction][0]*multiplier, col: current.col - 1})
+			// fmt.Println(Point{row: current.row + dirs[current_instruction][0]*multiplier, col: current.col}, Point{row: current.row + dirs[current_instruction][0]*multiplier, col: current.col - 1})
+			points_to_validate = append(points_to_validate, Point{row: current.row + dirs[current_instruction][0]*multiplier, col: current.col + modifier})
+			points_to_validate = append(points_to_validate, Point{row: current.row + dirs[current_instruction][0]*multiplier, col: current.col - 1 + modifier})
 		}
 	}
 
 	if prev_symbol == "]" {
 
 		if r_first_symbol == "[" {
-			points_to_validate = append(points_to_validate, Point{row: current.row + dirs[current_instruction][0]*multiplier, col: current.col})
-			points_to_validate = append(points_to_validate, Point{row: current.row + dirs[current_instruction][0]*multiplier, col: current.col + 1})
+			// fmt.Println(Point{row: current.row + dirs[current_instruction][0]*multiplier, col: current.col}, Point{row: current.row + dirs[current_instruction][0]*multiplier, col: current.col + 1})
+			points_to_validate = append(points_to_validate, Point{row: current.row + dirs[current_instruction][0]*multiplier, col: current.col + modifier})
+			points_to_validate = append(points_to_validate, Point{row: current.row + dirs[current_instruction][0]*multiplier, col: current.col + 1 + modifier})
 		}
 
 		if r_first_symbol == "]" {
-			points_to_validate = append(points_to_validate, Point{row: current.row + dirs[current_instruction][0]*multiplier, col: current.col})
-			points_to_validate = append(points_to_validate, Point{row: current.row + dirs[current_instruction][0]*multiplier, col: current.col - 1})
+			// fmt.Println(Point{row: current.row + dirs[current_instruction][0]*multiplier, col: current.col}, Point{row: current.row + dirs[current_instruction][0]*multiplier, col: current.col - 1})
+			points_to_validate = append(points_to_validate, Point{row: current.row + dirs[current_instruction][0]*multiplier, col: current.col + modifier})
+			points_to_validate = append(points_to_validate, Point{row: current.row + dirs[current_instruction][0]*multiplier, col: current.col - 1 + modifier})
 		}
 	}
 
+	// fmt.Println(points_to_validate)
+	// fmt.Println("new")
+	(*current).col += modifier
 	return points_to_validate
 }
 
+func validate_left(maze *[][]string, current *Point, current_instruction string, dirs map[string][2]int, multiplier int) []Point {
+	var points_to_validate []Point
+
+	prev_symbol := (*maze)[(*current).row+dirs[current_instruction][0]*(multiplier-1)][(*current).col]
+	r_first_symbol := (*maze)[(*current).row+dirs[current_instruction][0]*multiplier][(*current).col]
+
+	modifier := 0
+	if r_first_symbol == "." {
+		if prev_symbol == "[" {
+			if (*maze)[(*current).row+dirs[current_instruction][0]*multiplier][(*current).col+1] == "[" {
+				modifier = 1
+			}
+		}
+		if prev_symbol == "]" {
+			if (*maze)[(*current).row+dirs[current_instruction][0]*multiplier][(*current).col-1] == "]" {
+				modifier = -1
+			}
+		}
+	}
+
+	prev_symbol = (*maze)[(*current).row+dirs[current_instruction][0]*(multiplier-1)][(*current).col+modifier]
+	r_first_symbol = (*maze)[(*current).row+dirs[current_instruction][0]*multiplier][(*current).col+modifier]
+	fmt.Println(prev_symbol, r_first_symbol, multiplier)
+	if prev_symbol == "[" {
+		if r_first_symbol == "[" {
+			// fmt.Println(Point{row: current.row + dirs[current_instruction][0]*multiplier, col: current.col}, Point{row: current.row + dirs[current_instruction][0]*multiplier, col: current.col + 1})
+			points_to_validate = append(points_to_validate, Point{row: current.row + dirs[current_instruction][0]*multiplier, col: current.col + modifier})
+			points_to_validate = append(points_to_validate, Point{row: current.row + dirs[current_instruction][0]*multiplier, col: current.col + 1 + modifier})
+		}
+
+		if r_first_symbol == "]" {
+			// fmt.Println(Point{row: current.row + dirs[current_instruction][0]*multiplier, col: current.col}, Point{row: current.row + dirs[current_instruction][0]*multiplier, col: current.col - 1})
+			points_to_validate = append(points_to_validate, Point{row: current.row + dirs[current_instruction][0]*multiplier, col: current.col + modifier})
+			points_to_validate = append(points_to_validate, Point{row: current.row + dirs[current_instruction][0]*multiplier, col: current.col - 1 + modifier})
+		}
+	}
+
+	if prev_symbol == "]" {
+
+		if r_first_symbol == "[" {
+			// fmt.Println(Point{row: current.row + dirs[current_instruction][0]*multiplier, col: current.col}, Point{row: current.row + dirs[current_instruction][0]*multiplier, col: current.col + 1})
+			points_to_validate = append(points_to_validate, Point{row: current.row + dirs[current_instruction][0]*multiplier, col: current.col + modifier})
+			points_to_validate = append(points_to_validate, Point{row: current.row + dirs[current_instruction][0]*multiplier, col: current.col + 1 + modifier})
+		}
+
+		if r_first_symbol == "]" {
+			// fmt.Println(Point{row: current.row + dirs[current_instruction][0]*multiplier, col: current.col}, Point{row: current.row + dirs[current_instruction][0]*multiplier, col: current.col - 1})
+			points_to_validate = append(points_to_validate, Point{row: current.row + dirs[current_instruction][0]*multiplier, col: current.col + modifier})
+			points_to_validate = append(points_to_validate, Point{row: current.row + dirs[current_instruction][0]*multiplier, col: current.col - 1 + modifier})
+		}
+	}
+
+	// fmt.Println(points_to_validate)
+	// fmt.Println("new")
+	(*current).col += modifier
+	return points_to_validate
+}
 func validate_to_left(maze *[][]string, current *Point, current_instruction string, dirs map[string][2]int, multiplier int) []Point {
 	l_multiplier := 0
 	f_multiplier := 0
@@ -729,6 +797,7 @@ func validate_to_left(maze *[][]string, current *Point, current_instruction stri
 func move_for_instructions_up_down(maze *[][]string, current *Point, current_instruction string, dirs map[string][2]int) {
 	multiplier := 0
 	ud_dot_hashtag := false
+	// initial_col := (*&current.col)
 
 	var points_to_move []Point
 	robot_position := Point{row: current.row + dirs[current_instruction][0]*-1, col: current.col}
@@ -789,6 +858,7 @@ func move_for_instructions_up_down(maze *[][]string, current *Point, current_ins
 
 			}
 		}
+
 		if all_dots {
 			points_to_move = append(points_to_move, points_to_validate...)
 			ud_dot_hashtag = true

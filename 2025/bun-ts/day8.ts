@@ -43,10 +43,37 @@ async function part1() {
       currentDistanceArr.push({ startIdx: i, endIdx: j, distance });
     }
   }
-  currentDistanceArr.sort((a, b) => a.distance - b.distance);
+  const top10 = currentDistanceArr
+    .sort((a, b) => a.distance - b.distance)
+    .slice(0, 10);
   // .sort((a, b) => a.startIdx - b.startIdx);
+  //
 
-  console.log(currentDistanceArr);
+  // console.log(currentDistanceArr.sort((a, b) => a.distance - b.distance));
+  const jukeConnectionsIdxs: number[][] = [];
+  for (let i = 0; i < top10.length; i++) {
+    const localJukeIdxs: number[] = [];
+    for (let j = i + 1; j < top10.length; j++) {
+      if (
+        top10[i].startIdx == top10[j].startIdx ||
+        top10[i].endIdx == top10[j].endIdx ||
+        top10[i].startIdx == top10[j].endIdx
+      ) {
+        localJukeIdxs.push(
+          top10[i].startIdx,
+          top10[i].endIdx,
+          top10[j].startIdx,
+          top10[j].endIdx,
+        );
+
+        top10.splice(j, 1);
+      }
+      // console.log(top10[i], top10[j]);
+    }
+    jukeConnectionsIdxs.push(localJukeIdxs);
+  }
+
+  jukeConnectionsIdxs.forEach((a) => console.log(a));
 }
 
 part1();

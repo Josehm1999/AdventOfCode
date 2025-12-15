@@ -37,8 +37,8 @@ async function part1() {
       currentDistanceArr.push({ startIdx: i, endIdx: j, distance });
     }
   }
-  const test = currentDistanceArr.sort((a, b) => b.distance - a.distance);
-  console.log(test);
+  // const test = currentDistanceArr.sort((a, b) => b.distance - a.distance);
+  // console.log(test);
   const top10 = currentDistanceArr
     .sort((a, b) => a.distance - b.distance)
     .slice(0, 10);
@@ -70,7 +70,7 @@ async function part1() {
 
 // part1();
 async function part2() {
-  const content = await Bun.file("./test_day8_example.txt").text();
+  const content = await Bun.file("./test_day8.txt").text();
   const rows = content.split("\n").filter((ifilter) => ifilter !== "");
   const rowsSplittedLetters: JBox[] = [];
 
@@ -96,36 +96,37 @@ async function part2() {
       currentDistanceArr.push({ startIdx: i, endIdx: j, distance });
     }
   }
-  const top10 = currentDistanceArr
-    .sort((a, b) => a.distance - b.distance)
-    .slice(0, 10);
+  const top10 = currentDistanceArr.sort((a, b) => a.distance - b.distance);
   const arrTop10: number[][] = [];
-
   top10.forEach((a) => arrTop10.push([a.startIdx, a.endIdx]));
+
   for (let i = 0; i < arrTop10.length; i++) {
+    let innerPair: number[] = [];
     for (let k = i + 1; k < arrTop10.length; k++) {
       const intersection = arrTop10[k].filter((x) => arrTop10[i].includes(x));
       if (intersection!.length > 0) {
         const difference = arrTop10[k]?.filter((x) => !arrTop10[i].includes(x));
         if (difference!.length > 0) {
-          arrTop10[i].push(...difference);
+          innerPair = arrTop10[k];
+          arrTop10[i] = Array.from(new Set(arrTop10[i].concat(arrTop10[k])));
           arrTop10.splice(k, 1);
           i = 0;
+          k = 0;
         } else {
           arrTop10.splice(k, 1);
           i = 0;
+          k = 0;
         }
       }
     }
+
+    if (arrTop10[0].length == rows.length) {
+      const pairA = parseInt(rows[innerPair[0]].split(",")[0]);
+      const pairB = parseInt(rows[innerPair[1]].split(",")[0]);
+      console.log(pairA * pairB);
+      break;
+    }
   }
-
-  const topRest = currentDistanceArr
-    .sort((a, b) => a.distance - b.distance)
-    .slice(10);
-
-  console.log(arrTop10);
-  arrTop10.sort((a, b) => b.length - a.length);
-  console.log(arrTop10[0].length * arrTop10[1].length * arrTop10[2].length);
 }
 
 part2();

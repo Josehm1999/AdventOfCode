@@ -87,7 +87,7 @@ async function part1() {
 
 // part1();
 async function part2() {
-  const content = await Bun.file("./test_day9_example.txt").text();
+  const content = await Bun.file("./test_day9.txt").text();
   const pointArr: MPoint[] = [];
   content
     .split("\n")
@@ -162,31 +162,17 @@ async function part2() {
           //i esta a abajo y a la derecha
           // newPointA esta abajo y a la izquierda
           pointAflag = pointArr.some(
-            (p) => p.x == newPointA.x && p.y == newPointA.y,
-          );
-
-          const possibleXAxisA = pointArr.filter(
             (p) =>
-              (p.x > newPointA.x && p.y < newPointA.y) ||
-              (p.x < newPointA.x && p.y < newPointA.y),
+              (p.x == newPointA.x && p.y == newPointA.y) ||
+              (p.x > newPointA.x && p.y < newPointA.y),
           );
-          if (!pointAflag) {
-            pointAflag = possibleXAxisA.length >= 2;
-          }
 
           // newPointB esta arriba y a la derecha
           pointBflag = pointArr.some(
-            (p) => p.x == newPointB.x && p.y == newPointB.y,
-          );
-
-          const possibleXAxisB = pointArr.filter(
             (p) =>
-              (p.x < newPointB.x && p.y > newPointB.y) ||
-              (p.x > newPointA.x && p.y > newPointA.y),
+              (p.x == newPointB.x && p.y == newPointB.y) ||
+              (p.x < newPointB.x && p.y > newPointB.y),
           );
-          if (!pointBflag) {
-            pointBflag = possibleXAxisB.length >= 2;
-          }
         }
 
         if (pointArr[j].x > pointArr[i].x && pointArr[j].y > pointArr[i].y) {
@@ -196,30 +182,14 @@ async function part2() {
           //i esta arriba y a la izquierda
           // newPointA esta arriba y a la derecha
           pointAflag = pointArr.some(
-            (p) => p.x == newPointA.x && p.y == newPointA.y,
+            (p) => p.x <= newPointA.x && p.y >= newPointA.y,
+            // (p.x < newPointA.x && p.y > newPointA.y),
           );
-
-          const possibleXAxisA = pointArr.filter(
-            (p) =>
-              (p.x > newPointA.x && p.y > newPointA.y) ||
-              (p.x < newPointA.x && p.y > newPointA.y),
-          );
-          if (!pointAflag) {
-            pointAflag = possibleXAxisA.length >= 2;
-          }
           // newPointB esta abajo y a la izquierda
           pointBflag = pointArr.some(
-            (p) => p.x == newPointB.x && p.y == newPointB.y,
+            (p) => p.x >= newPointB.x && p.y <= newPointB.y,
+            // (p.x > newPointB.x && p.y < newPointB.y),
           );
-
-          const possibleXAxisB = pointArr.filter(
-            (p) =>
-              (p.x < newPointB.x && p.y < newPointB.y) ||
-              (p.x > newPointA.x && p.y < newPointA.y),
-          );
-          if (!pointBflag) {
-            pointBflag = possibleXAxisB.length >= 2;
-          }
         }
 
         if (pointArr[j].x > pointArr[i].x && pointArr[i].y > pointArr[j].y) {
@@ -229,65 +199,37 @@ async function part2() {
           //i esta arriba y a la derecha
           // newPointA esta arriba y a la izquierda
           pointAflag = pointArr.some(
-            (p) => p.x == newPointA.x && p.y == newPointA.y,
+            (p) => p.x <= newPointA.x && p.y <= newPointA.y,
+            // (p.x < newPointA.x && p.y < newPointA.y),
           );
-
-          const possibleXAxisA = pointArr.filter(
-            (p) =>
-              (p.x > newPointA.x && p.y < newPointA.y) ||
-              (p.x < newPointA.x && p.y < newPointA.y),
-          );
-          if (!pointAflag) {
-            pointAflag = possibleXAxisA.length >= 2;
-          }
           // newPointB esta abajo y a la derecha
           pointBflag = pointArr.some(
-            (p) => p.x == newPointB.x && p.y == newPointB.y,
+            (p) => p.x >= newPointB.x && p.y >= newPointB.y,
+            // (p.x > newPointB.x && p.y > newPointB.y),
           );
-
-          const possibleXAxisB = pointArr.filter(
-            (p) =>
-              (p.x < newPointB.x && p.y > newPointB.y) ||
-              (p.x > newPointA.x && p.y > newPointA.y),
-          );
-          if (!pointBflag) {
-            pointBflag = possibleXAxisB.length >= 2;
-          }
         }
 
         if (pointArr[i].x > pointArr[j].x && pointArr[j].y > pointArr[i].y) {
           if (pointArr[i].x == 5 && pointArr[i].y == 9) {
             console.log(pointArr[i], pointArr[j]);
           }
+
           // i esta abajo y a la izquierda
           // newPointA esta abajo y a la derecha
           pointAflag = pointArr.some(
-            (p) => p.x == newPointA.x && p.y == newPointA.y,
+            (p) => p.x >= newPointA.x && p.y >= newPointA.y,
+            // (p.x > newPointA.x && p.y > newPointA.y),
           );
-
-          const possibleXAxisA = pointArr.filter(
-            (p) =>
-              (p.x > newPointA.x && p.y > newPointA.y) ||
-              (p.x < newPointA.x && p.y > newPointA.y),
-          );
-          if (!pointAflag) {
-            pointAflag = possibleXAxisA.length >= 2;
-          }
           // newPointB esta arriba y a la izquierda
           pointBflag = pointArr.some(
-            (p) => p.x == newPointB.x && p.y == newPointB.y,
+            (p) => p.x <= newPointB.x && p.y <= newPointB.y,
+            // (p.x < newPointB.x && p.y < newPointB.y),
           );
-
-          const possibleXAxisB = pointArr.filter(
-            (p) =>
-              (p.x < newPointB.x && p.y < newPointB.y) ||
-              (p.x > newPointA.x && p.y < newPointA.y),
-          );
-          if (!pointBflag) {
-            pointBflag = possibleXAxisB.length >= 2;
-          }
         }
 
+        // if (pointAflag && pointBflag) {
+        //   console.log(pointArr[i], pointArr[j]);
+        // }
         if (pointAflag && pointBflag) {
           areaByPairs.set(
             key,
@@ -305,7 +247,8 @@ async function part2() {
     }
   }
   let area = 0;
-  for (let val of areaByPairs.values()) {
+  for (let [key, val] of areaByPairs.entries()) {
+    // console.log(key, val);
     if (area < val) {
       area = val;
     }

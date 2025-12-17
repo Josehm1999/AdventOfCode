@@ -7,25 +7,42 @@ const content = await fetch("/test_day9.txt");
 let points = [];
 
 function is_inside(arr, newPoint) {
-  let count = 0;
+  let inside = false;
+  const x = newPoint.x;
+  const y = newPoint.y;
+  let p1 = arr[0];
+  let p2;
 
-  for (let i = 0; i < arr.length - 1; i++) {
-    const first = arr[i];
-    const second = arr[i + 1];
+  for (let i = 1; i <= arr.length; i++) {
+    p2 = arr[i % arr.length];
 
-    if (
-      ((newPoint.y > first.y && newPoint.y < second.y) ||
-        (newPoint.y < first.y && newPoint.y > second.y)) &&
-      newPoint.x <
-        first.x +
-          ((newPoint.y - first.y) / (second.y - first.y)) * (second.x - first.x)
-    ) {
-      count += 1;
+    if (y > Math.min(p1.y, p2.y)) {
+      if (y <= Math.max(p1.y, p2.y)) {
+        if (x <= Math.max(p1.x, p2.x)) {
+          const x_intersection =
+            ((y - p1.y) * (p2.x - p1.x)) / (p2.y - p1.y) + p1.x;
+
+          if (p1.x === p2.x || x <= x_intersection) {
+            inside = !inside;
+          }
+        }
+      }
     }
+    p1 = p2;
   }
+  // if (
+  //   ((newPoint.y > first.y && newPoint.y < second.y) ||
+  //     (newPoint.y < first.y && newPoint.y > second.y)) &&
+  //   newPoint.x <
+  //     first.x +
+  //       ((newPoint.y - first.y) / (second.y - first.y)) * (second.x - first.x)
+  // ) {
+  //   count += 1;
+  // }
+  // }
 
   // si es par significa que salio sino ta dentro
-  return count % 2 == 1;
+  return inside;
 }
 
 content.text().then((x) => {
@@ -65,29 +82,30 @@ content.text().then((x) => {
         const newPointA = { x: pointArr[i].x, y: pointArr[j].y };
         const newPointB = { x: pointArr[j].x, y: pointArr[i].y };
 
-        // const isInsideA = is_inside(pointArr, newPointA);
-        // const isInsideB = is_inside(pointArr, newPointB);
-        // const isInsideC = is_inside(pointArr, pointArr[i]);
-        // const isInsideD = is_inside(pointArr, pointArr[j]);
+        const isInsideA = is_inside(pointArr, newPointA);
+        const isInsideB = is_inside(pointArr, newPointB);
+        const isInsideC = is_inside(pointArr, pointArr[i]);
+        const isInsideD = is_inside(pointArr, pointArr[j]);
 
-        // if (isInsideA && isInsideB && isInsideC && isInsideD) {
         // console.log("entra");
         //single rectangle
 
-        const test =
-          ((pointArr[i].x > pointArr[j].x
-            ? pointArr[i].x - pointArr[j].x
-            : pointArr[j].x - pointArr[i].x) +
-            1) *
-          ((pointArr[i].y > pointArr[j].y
-            ? pointArr[i].y - pointArr[j].y
-            : pointArr[j].y - pointArr[i].y) +
-            1);
-        if (currentMax < test) {
-          currentMax = test;
-          const curr = [pointArr[i], newPointA, pointArr[j], newPointB];
-          rectPoints = [];
-          rectPoints.push(curr);
+        if (isInsideA && isInsideB && isInsideD && isInsideC) {
+          const test =
+            ((pointArr[i].x > pointArr[j].x
+              ? pointArr[i].x - pointArr[j].x
+              : pointArr[j].x - pointArr[i].x) +
+              1) *
+            ((pointArr[i].y > pointArr[j].y
+              ? pointArr[i].y - pointArr[j].y
+              : pointArr[j].y - pointArr[i].y) +
+              1);
+          if (currentMax < test) {
+            currentMax = test;
+            const curr = [pointArr[i], newPointA, pointArr[j], newPointB];
+            rectPoints = [];
+            rectPoints.push(curr);
+          }
         }
       }
     }

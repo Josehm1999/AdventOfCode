@@ -86,6 +86,28 @@ async function part1() {
 }
 
 // part1();
+//
+function is_inside(arr: MPoint[], newPoint: MPoint) {
+  let count = 0;
+
+  for (let i = 0; i < arr.length - 1; i++) {
+    const first = arr[i];
+    const second = arr[i + 1];
+
+    if (
+      newPoint.x > first.x &&
+      newPoint.x < second.x &&
+      newPoint.y <
+        first.y +
+          ((newPoint.x - first.x) / (second.x - first.x)) * (second.y - first.y)
+    ) {
+      count += 1;
+    }
+  }
+
+  // si es par significa que salio sino ta dentro
+  return count % 2 == 1;
+}
 async function part2() {
   const content = await Bun.file("./test_day9.txt").text();
   const pointArr: MPoint[] = [];
@@ -150,87 +172,14 @@ async function part2() {
         const newPointA: MPoint = { x: pointArr[i].x, y: pointArr[j].y };
         const newPointB: MPoint = { x: pointArr[j].x, y: pointArr[i].y };
 
-        // console.log("A", newPointA, "B", newPointB);
-        let pointAflag = false;
-        let pointBflag = false;
-        // 4 variaciones para cada ezquina
-        if (pointArr[i].x > pointArr[j].x && pointArr[i].y > pointArr[j].y) {
-          // console.log(1)
-          if (pointArr[i].x == 5 && pointArr[i].y == 9) {
-            console.log(pointArr[i], pointArr[j]);
-          }
-          //i esta a abajo y a la derecha
-          // newPointA esta abajo y a la izquierda
-          pointAflag = pointArr.some(
-            (p) =>
-              (p.x == newPointA.x && p.y == newPointA.y) ||
-              (p.x > newPointA.x && p.y < newPointA.y),
-          );
+        const isInsideA = pointArr.some(
+          (x) => x.x == newPointA.x && x.y == newPointA.y,
+        );
 
-          // newPointB esta arriba y a la derecha
-          pointBflag = pointArr.some(
-            (p) =>
-              (p.x == newPointB.x && p.y == newPointB.y) ||
-              (p.x < newPointB.x && p.y > newPointB.y),
-          );
-        }
-
-        if (pointArr[j].x > pointArr[i].x && pointArr[j].y > pointArr[i].y) {
-          if (pointArr[i].x == 5 && pointArr[i].y == 9) {
-            console.log(pointArr[i], pointArr[j]);
-          }
-          //i esta arriba y a la izquierda
-          // newPointA esta arriba y a la derecha
-          pointAflag = pointArr.some(
-            (p) => p.x <= newPointA.x && p.y >= newPointA.y,
-            // (p.x < newPointA.x && p.y > newPointA.y),
-          );
-          // newPointB esta abajo y a la izquierda
-          pointBflag = pointArr.some(
-            (p) => p.x >= newPointB.x && p.y <= newPointB.y,
-            // (p.x > newPointB.x && p.y < newPointB.y),
-          );
-        }
-
-        if (pointArr[j].x > pointArr[i].x && pointArr[i].y > pointArr[j].y) {
-          if (pointArr[i].x == 5 && pointArr[i].y == 9) {
-            console.log(pointArr[i], pointArr[j]);
-          }
-          //i esta arriba y a la derecha
-          // newPointA esta arriba y a la izquierda
-          pointAflag = pointArr.some(
-            (p) => p.x <= newPointA.x && p.y <= newPointA.y,
-            // (p.x < newPointA.x && p.y < newPointA.y),
-          );
-          // newPointB esta abajo y a la derecha
-          pointBflag = pointArr.some(
-            (p) => p.x >= newPointB.x && p.y >= newPointB.y,
-            // (p.x > newPointB.x && p.y > newPointB.y),
-          );
-        }
-
-        if (pointArr[i].x > pointArr[j].x && pointArr[j].y > pointArr[i].y) {
-          if (pointArr[i].x == 5 && pointArr[i].y == 9) {
-            console.log(pointArr[i], pointArr[j]);
-          }
-
-          // i esta abajo y a la izquierda
-          // newPointA esta abajo y a la derecha
-          pointAflag = pointArr.some(
-            (p) => p.x >= newPointA.x && p.y >= newPointA.y,
-            // (p.x > newPointA.x && p.y > newPointA.y),
-          );
-          // newPointB esta arriba y a la izquierda
-          pointBflag = pointArr.some(
-            (p) => p.x <= newPointB.x && p.y <= newPointB.y,
-            // (p.x < newPointB.x && p.y < newPointB.y),
-          );
-        }
-
-        // if (pointAflag && pointBflag) {
-        //   console.log(pointArr[i], pointArr[j]);
-        // }
-        if (pointAflag && pointBflag) {
+        const isInsideB = pointArr.some(
+          (x) => x.x == newPointB.x && x.y == newPointB.y,
+        );
+        if (isInsideA && isInsideB) {
           areaByPairs.set(
             key,
             ((pointArr[i].x > pointArr[j].x

@@ -95,8 +95,8 @@ function is_inside(arr: MPoint[], newPoint: MPoint) {
     const second = arr[i + 1];
 
     if (
-      newPoint.x > first.x &&
-      newPoint.x < second.x &&
+      ((newPoint.x > first.x && newPoint.x < second.x) ||
+        (newPoint.x < first.x && newPoint.x > second.x)) &&
       newPoint.y <
         first.y +
           ((newPoint.x - first.x) / (second.x - first.x)) * (second.y - first.y)
@@ -108,8 +108,9 @@ function is_inside(arr: MPoint[], newPoint: MPoint) {
   // si es par significa que salio sino ta dentro
   return count % 2 == 1;
 }
+
 async function part2() {
-  const content = await Bun.file("./test_day9.txt").text();
+  const content = await Bun.file("./test_day9_example.txt").text();
   const pointArr: MPoint[] = [];
   content
     .split("\n")
@@ -172,14 +173,13 @@ async function part2() {
         const newPointA: MPoint = { x: pointArr[i].x, y: pointArr[j].y };
         const newPointB: MPoint = { x: pointArr[j].x, y: pointArr[i].y };
 
-        const isInsideA = pointArr.some(
-          (x) => x.x == newPointA.x && x.y == newPointA.y,
-        );
+        const isInsideA = is_inside(pointArr, newPointA);
+        const isInsideB = is_inside(pointArr, newPointB);
+        const isInsideC = is_inside(pointArr, pointArr[i]);
+        const isInsideD = is_inside(pointArr, pointArr[j]);
 
-        const isInsideB = pointArr.some(
-          (x) => x.x == newPointB.x && x.y == newPointB.y,
-        );
-        if (isInsideA && isInsideB) {
+        if (isInsideA && isInsideB && isInsideC && isInsideD) {
+          console.log(newPointA, newPointB, pointArr[i], pointArr[j]);
           areaByPairs.set(
             key,
             ((pointArr[i].x > pointArr[j].x

@@ -44,44 +44,6 @@ function is_inside(arr, newPoint, memo) {
   return inside;
 }
 
-function doSegmentsIntersect(A, B, C, D) {
-  const o1 = Morientation(A, B, C);
-  const o2 = Morientation(A, B, D);
-  const o3 = Morientation(C, D, A);
-  const o4 = Morientation(C, D, B);
-  if (o1 != o2 && o3 != o4) {
-    return true;
-  }
-
-  if (o1 == 0 && onSegment(A, C, B)) return true;
-  if (o2 == 0 && onSegment(A, D, B)) return true;
-  if (o3 == 0 && onSegment(C, A, D)) return true;
-  if (o4 == 0 && onSegment(C, B, D)) return true;
-
-  return false;
-}
-
-function onSegment(p, q, r) {
-  return (
-    q.x <= Math.max(p.x, r.x) &&
-    q.x >= Math.min(p.x, r.x) &&
-    q.y <= Math.max(p.y, r.y) &&
-    q.y >= Math.min(p.y, r.y)
-  );
-}
-
-function Morientation(p, q, r) {
-  const val = (q.y - p.y) * (r.x - q.x) - (q.x - p.x) * (r.y - q.y);
-  if (val == 0) {
-    return 0;
-  }
-  if (val > 0) {
-    return 1;
-  } else {
-    return 2;
-  }
-}
-
 content.text().then((x) => {
   x.split("\n")
     .filter((ifilter) => ifilter !== "")
@@ -96,6 +58,7 @@ content.text().then((x) => {
   let rectPoints = [];
   let currentMax = [];
   let pointArr = points;
+
   for (let i = 0; i < pointArr.length; i++) {
     for (let j = i + 1; j < pointArr.length; j++) {
       if (pointArr[i].x == pointArr[j].x) {
@@ -116,71 +79,25 @@ content.text().then((x) => {
       ) {
         continue;
       } else {
-        const newPointA = { x: pointArr[i].x, y: pointArr[j].y };
-        const newPointB = { x: pointArr[j].x, y: pointArr[i].y };
-
-        const isInsideA = is_inside(pointArr, newPointA);
-        const isInsideB = is_inside(pointArr, newPointB);
-
-        if (isInsideA && isInsideB) {
-          let checkA;
-          let checkB;
-          let checkC;
-          let checkD;
-          for (let k = 0; k < pointArr.length - 1; k++) {
-            const firstS = pointArr[k];
-            const secondS = pointArr[k + 1];
-
-            checkA = doSegmentsIntersect(
-              pointArr[i],
-              newPointA,
-              firstS,
-              secondS,
-            );
-            checkB = doSegmentsIntersect(
-              newPointA,
-              pointArr[j],
-              firstS,
-              secondS,
-            );
-            checkC = doSegmentsIntersect(
-              pointArr[j],
-              newPointB,
-              firstS,
-              secondS,
-            );
-            checkD = doSegmentsIntersect(
-              newPointB,
-              pointArr[i],
-              firstS,
-              secondS,
-            );
-          }
-
-          if (checkA && checkB && checkC && checkD) {
-            // console.log("entra", isInsideA.counter);
-            const test =
-              ((pointArr[i].x > pointArr[j].x
-                ? pointArr[i].x - pointArr[j].x
-                : pointArr[j].x - pointArr[i].x) +
-                1) *
-              ((pointArr[i].y > pointArr[j].y
-                ? pointArr[i].y - pointArr[j].y
-                : pointArr[j].y - pointArr[i].y) +
-                1);
-            if (currentMax < test) {
-              currentMax = test;
-              const curr = [pointArr[i], newPointA, pointArr[j], newPointB];
-              rectPoints = [];
-              rectPoints.push(curr);
-            }
-            // }
-          }
+        const test =
+          ((pointArr[i].x > pointArr[j].x
+            ? pointArr[i].x - pointArr[j].x
+            : pointArr[j].x - pointArr[i].x) +
+            1) *
+          ((pointArr[i].y > pointArr[j].y
+            ? pointArr[i].y - pointArr[j].y
+            : pointArr[j].y - pointArr[i].y) +
+            1);
+        if (currentMax < test) {
+          currentMax = test;
+          const curr = [pointArr[i], newPointA, pointArr[j], newPointB];
+          rectPoints = [];
+          rectPoints.push(curr);
         }
       }
     }
   }
-  console.log(points);
+  console.log(currentMax);
 
   const xs = points.map((p) => p.x);
   const ys = points.map((p) => p.y);

@@ -87,122 +87,96 @@ async function part1() {
 
 // part1();
 //
-function is_inside(arr: MPoint[], newPoint: MPoint) {
-  let count = 0;
+function is_inside(
+  arr: MPoint[],
+  newPoint: MPoint,
+  memo?: Map<string, boolean>,
+) {
+  memo = memo || new Map();
 
-  for (let i = 0; i < arr.length - 1; i++) {
-    const first = arr[i];
-    const second = arr[i + 1];
-
-    if (
-      ((newPoint.x > first.x && newPoint.x < second.x) ||
-        (newPoint.x < first.x && newPoint.x > second.x)) &&
-      newPoint.y <
-        first.y +
-          ((newPoint.x - first.x) / (second.x - first.x)) * (second.y - first.y)
-    ) {
-      count += 1;
-    }
+  const key1 = `${newPoint.x}-${newPoint.y}`;
+  if (memo.has(key1)) {
+    return memo.get(key1);
   }
 
-  // si es par significa que salio sino ta dentro
-  return count % 2 == 1;
-}
+  let inside = false;
+  const x = newPoint.x;
+  const y = newPoint.y;
+  let p1 = arr[0];
+  let p2: MPoint;
+  for (let i = 1; i <= arr.length; i++) {
+    if (i < arr.length && arr[i].x == x && arr[i].y == y) {
+      return true;
+    }
 
+    p2 = arr[i % arr.length];
+
+    if (y > Math.min(p1.y, p2.y)) {
+      if (y <= Math.max(p1.y, p2.y)) {
+        if (x <= Math.max(p1.x, p2.x)) {
+          const x_intersection =
+            ((y - p1.y) * (p2.x - p1.x)) / (p2.y - p1.y) + p1.x;
+          if (p1.x === p2.x || x <= x_intersection) {
+            inside = !inside;
+          }
+        }
+      }
+    }
+    p1 = p2;
+  }
+  // si es par significa que salio sino ta dentro
+  memo.set(key1, inside);
+  return inside;
+}
 async function part2() {
-  const content = await Bun.file("./test_day9_example.txt").text();
+  const content = await Bun.file("./test_day9.txt").text();
   const pointArr: MPoint[] = [];
   content
     .split("\n")
     .filter((ifilter) => ifilter !== "")
     .forEach((x) => {
       const splits = x.split(",");
-      pointArr.push({ x: parseInt(splits[1]), y: parseInt(splits[0]) });
+      pointArr.push({ x: parseInt(splits[0]), y: parseInt(splits[1]) });
     });
 
-  const areaByPairs: Map<string, number> = new Map();
+  const segments: MPoint[][] = [] as MPoint[][];
+  for (let i = 0; i < pointArr.length; i++) {
+    const start = pointArr[i];
+    const end = pointArr[(i + 1) % pointArr.length]; // wrap around to close polygon
+    segments.push([start, end]);
+  }
+  const rectangleCandidates: { a: MPoint; b: MPoint; area: number }[] = [] as {
+    a: MPoint;
+    b: MPoint;
+    area: number;
+  }[];
   for (let i = 0; i < pointArr.length; i++) {
     for (let j = i + 1; j < pointArr.length; j++) {
-      const key = `${i}-${j}`;
-      if (pointArr[i].x == pointArr[j].x) {
-        areaByPairs.set(
-          key,
-          (pointArr[i].y > pointArr[j].y
-            ? pointArr[i].y - pointArr[j].y
-            : pointArr[j].y - pointArr[i].y) + 2,
-        );
-        continue;
-      }
-
-      if (pointArr[i].y == pointArr[j].y) {
-        areaByPairs.set(
-          key,
-          (pointArr[i].x > pointArr[j].x
-            ? pointArr[i].x - pointArr[j].x
-            : pointArr[j].x - pointArr[i].x) + 2,
-        );
-
-        continue;
-      }
-
-      if (
-        (pointArr[i].x > pointArr[j].x
-          ? pointArr[i].x - pointArr[j].x
-          : pointArr[j].x - pointArr[i].x) ==
-        (pointArr[i].y > pointArr[j].y
-          ? pointArr[i].y - pointArr[j].y
-          : pointArr[j].y - pointArr[i].y)
-      ) {
-        continue;
-      } else {
-        // console.log(
-        //   key,
-        //   pointArr[i],
-        //   pointArr[j],
-        //   ((pointArr[i].x > pointArr[j].x
-        //     ? pointArr[i].x - pointArr[j].x
-        //     : pointArr[j].x - pointArr[i].x) +
-        //     1) *
-        //     ((pointArr[i].y > pointArr[j].y
-        //       ? pointArr[i].y - pointArr[j].y
-        //       : pointArr[j].y - pointArr[i].y) +
-        //       1),
-        // );
-        //
-
-        const newPointA: MPoint = { x: pointArr[i].x, y: pointArr[j].y };
-        const newPointB: MPoint = { x: pointArr[j].x, y: pointArr[i].y };
-
-        const isInsideA = is_inside(pointArr, newPointA);
-        const isInsideB = is_inside(pointArr, newPointB);
-        const isInsideC = is_inside(pointArr, pointArr[i]);
-        const isInsideD = is_inside(pointArr, pointArr[j]);
-
-        if (isInsideA && isInsideB && isInsideC && isInsideD) {
-          console.log(newPointA, newPointB, pointArr[i], pointArr[j]);
-          areaByPairs.set(
-            key,
-            ((pointArr[i].x > pointArr[j].x
-              ? pointArr[i].x - pointArr[j].x
-              : pointArr[j].x - pointArr[i].x) +
-              1) *
-              ((pointArr[i].y > pointArr[j].y
-                ? pointArr[i].y - pointArr[j].y
-                : pointArr[j].y - pointArr[i].y) +
-                1),
-          );
-        }
-      }
+      const a = pointArr[i];
+      const b = pointArr[j];
+      const area = (Math.abs(a.x - b.x) + 1) * (Math.abs(a.y - b.y) + 1);
+      rectangleCandidates.push({ a, b, area });
     }
   }
-  let area = 0;
-  for (let [key, val] of areaByPairs.entries()) {
-    // console.log(key, val);
-    if (area < val) {
-      area = val;
-    }
-  }
-  console.log(area);
+
+  rectangleCandidates.sort((x, y) => y.area - x.area);
+
+  const validRect = rectangleCandidates.find(({ a, b }) => {
+    return segments.every((val) => {
+      const lineStart = val[0];
+      const lineEnd = val[1];
+      const leftOfRect = Math.max(a.x, b.x) <= Math.min(lineStart.x, lineEnd.x);
+      const rightOfRect =
+        Math.min(a.x, b.x) >= Math.max(lineStart.x, lineEnd.x);
+      const above = Math.max(a.y, b.y) <= Math.min(lineStart.y, lineEnd.y);
+      const below = Math.min(a.y, b.y) >= Math.max(lineStart.y, lineEnd.y);
+
+      return leftOfRect || rightOfRect || above || below;
+    });
+  });
+
+  const maxArea = validRect ? validRect.area : 0;
+  console.log(maxArea);
 }
 
 part2();

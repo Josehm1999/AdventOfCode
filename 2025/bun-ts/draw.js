@@ -55,49 +55,50 @@ content.text().then((x) => {
       });
     });
 
-  let rectPoints = [];
-  let currentMax = [];
-  let pointArr = points;
+  const pointArr = points;
 
+  const segments = [];
+  for (let i = 0; i < pointArr.length; i++) {
+    const start = pointArr[i];
+    const end = pointArr[(i + 1) % pointArr.length]; // wrap around to close polygon
+    segments.push([start, end]);
+  }
+  const rectangleCandidates = [];
   for (let i = 0; i < pointArr.length; i++) {
     for (let j = i + 1; j < pointArr.length; j++) {
-      if (pointArr[i].x == pointArr[j].x) {
-        continue;
-      }
-
-      if (pointArr[i].y == pointArr[j].y) {
-        continue;
-      }
-
-      if (
-        (pointArr[i].x > pointArr[j].x
-          ? pointArr[i].x - pointArr[j].x
-          : pointArr[j].x - pointArr[i].x) ==
-        (pointArr[i].y > pointArr[j].y
-          ? pointArr[i].y - pointArr[j].y
-          : pointArr[j].y - pointArr[i].y)
-      ) {
-        continue;
-      } else {
-        const test =
-          ((pointArr[i].x > pointArr[j].x
-            ? pointArr[i].x - pointArr[j].x
-            : pointArr[j].x - pointArr[i].x) +
-            1) *
-          ((pointArr[i].y > pointArr[j].y
-            ? pointArr[i].y - pointArr[j].y
-            : pointArr[j].y - pointArr[i].y) +
-            1);
-        if (currentMax < test) {
-          currentMax = test;
-          const curr = [pointArr[i], newPointA, pointArr[j], newPointB];
-          rectPoints = [];
-          rectPoints.push(curr);
-        }
-      }
+      const a = pointArr[i];
+      const b = pointArr[j];
+      const area = (Math.abs(a.x - b.x) + 1) * (Math.abs(a.y - b.y) + 1);
+      rectangleCandidates.push({ a, b, area });
     }
   }
-  console.log(currentMax);
+
+  rectangleCandidates.sort((x, y) => y.area - x.area);
+
+  const validRect = rectangleCandidates.find(({ a, b }) => {
+    return segments.every((val) => {
+      const lineStart = val[0];
+      const lineEnd = val[1];
+      const leftOfRect = Math.max(a.x, b.x) <= Math.min(lineStart.x, lineEnd.x);
+      const rightOfRect =
+        Math.min(a.x, b.x) >= Math.max(lineStart.x, lineEnd.x);
+      const above = Math.max(a.y, b.y) <= Math.min(lineStart.y, lineEnd.y);
+      const below = Math.min(a.y, b.y) >= Math.max(lineStart.y, lineEnd.y);
+
+      return leftOfRect || rightOfRect || above || below;
+    });
+  });
+
+  const maxArea = validRect ? validRect.area : 0;
+  console.log(maxArea);
+  let rectPoints = [
+    [
+      { x: validRect.b.x, y: validRect.a.y },
+      validRect.a,
+      { x: validRect.a.x, y: validRect.b.y },
+      validRect.b,
+    ],
+  ];
 
   const xs = points.map((p) => p.x);
   const ys = points.map((p) => p.y);
@@ -146,7 +147,6 @@ content.text().then((x) => {
 
   for (let k = 0; k < rectPoints.length; k++) {
     const curr = rectPoints[k];
-
     const transformedRect = curr.map(transform);
 
     // Draw the rectangle

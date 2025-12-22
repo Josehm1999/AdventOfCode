@@ -4,6 +4,11 @@ interface Machine {
   joltage: number[];
 }
 
+interface MCombinations {
+  lightDiagramCombination: string;
+  buttonCombination: number[][][];
+}
+
 async function part1() {
   const content = await Bun.file("./test_day10_example.txt").text();
   // console.log(content.split('\n'))
@@ -29,18 +34,26 @@ async function part1() {
     };
   });
 
+  const buttonPresses: Map<string, number[][][]> = new Map();
   machines.forEach((machine) => {
     console.log("------");
-
     machine.buttonWiring.forEach((_, i) => {
       for (let j = 1; j < machine.buttonWiring.length + 1; j++) {
-        console.log(machine.buttonWiring.slice(i, i + j));
-        // for (let k = i + 1; k < machine.buttonWiring.length; k++) {
-        //   console.log(machine.buttonWiring.slice(i, k + j));
-        // }
+        // console.log(machine.buttonWiring.slice(i, i + j));
+        // buttonPresses.push(machine.buttonWiring.slice(i, i + j));
+        if (buttonPresses.has(machine.lightDiagram.join(""))) {
+          buttonPresses
+            .get(machine.lightDiagram.join(""))!
+            .push(machine.buttonWiring.slice(i, i + j));
+        } else {
+          buttonPresses.set(machine.lightDiagram.join(""), [
+            machine.buttonWiring.slice(i, i + j),
+          ]);
+        }
       }
     });
   });
+  console.log(buttonPresses);
 }
 
 part1();

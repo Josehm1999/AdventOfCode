@@ -61,9 +61,18 @@ async function part1() {
       }
     });
   });
-  console.log(buttonPresses);
+  // console.log(buttonPresses);
 
-
+  for (let [key, val] of buttonPresses) {
+    console.log(key);
+    val.forEach((combination, idx) => {
+      console.log(idx, combination);
+      let initialValue = Array(key.length).fill(".");
+      combination.forEach((button) => {
+        console.log(button, initialValue);
+      });
+    });
+  }
 }
 
 part1();

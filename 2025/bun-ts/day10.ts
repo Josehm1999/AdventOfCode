@@ -36,24 +36,34 @@ async function part1() {
 
   const buttonPresses: Map<string, number[][][]> = new Map();
   machines.forEach((machine) => {
-    console.log("------");
-    machine.buttonWiring.forEach((_, i) => {
-      for (let j = 1; j < machine.buttonWiring.length + 1; j++) {
-        // console.log(machine.buttonWiring.slice(i, i + j));
-        // buttonPresses.push(machine.buttonWiring.slice(i, i + j));
-        if (buttonPresses.has(machine.lightDiagram.join(""))) {
-          buttonPresses
-            .get(machine.lightDiagram.join(""))!
-            .push(machine.buttonWiring.slice(i, i + j));
-        } else {
-          buttonPresses.set(machine.lightDiagram.join(""), [
-            machine.buttonWiring.slice(i, i + j),
-          ]);
+    // console.log("------");
+    machine.buttonWiring.forEach((button, i) => {
+      if (buttonPresses.has(machine.lightDiagram.join(""))) {
+        buttonPresses.get(machine.lightDiagram.join(""))!.push([button]);
+      } else {
+        buttonPresses.set(machine.lightDiagram.join(""), [[button]]);
+      }
+
+      for (let j = i + 1; j < machine.buttonWiring.length; j++) {
+        // console.log("not counted", button, machine.buttonWiring[j]);
+        for (let k = j + 1; k <= machine.buttonWiring.length; k++) {
+          // console.log(button, machine.buttonWiring.slice(j, k));
+          if (buttonPresses.has(machine.lightDiagram.join(""))) {
+            buttonPresses
+              .get(machine.lightDiagram.join(""))!
+              .push([button].concat(machine.buttonWiring.slice(j, k)));
+          } else {
+            buttonPresses.set(machine.lightDiagram.join(""), [
+              [button].concat(machine.buttonWiring.slice(j, k)),
+            ]);
+          }
         }
       }
     });
   });
   console.log(buttonPresses);
+
+
 }
 
 part1();
